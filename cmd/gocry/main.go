@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/idelchi/go-encryptor/internal/encrypt"
+	"github.com/idelchi/go-encryptor/pg/stdin"
 )
 
 // Global variable for CI stamping.
@@ -47,17 +48,22 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	var data *os.File
 
-	// Open the input file
-	inputFile, err := os.Open(cfg.File)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "opening input file %q: %v\n", cfg.File, err)
-		os.Exit(1)
+	if stdin.IsPiped() {
+		data = os.Stdin
+	} else {
+		// Open the input file
+		data, err = os.Open(cfg.File)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "opening input file %q: %v\n", cfg.File, err)
+			os.Exit(1)
+		}
+		defer data.Close()
 	}
-	defer inputFile.Close()
 
 	// Use os.Stdout as the writer
-	processed, err := encrypt.Process(cfg.Mode, cfg.Operation, cfg.Type, key, inputFile, os.Stdout)
+	processed, err := encrypt.Process(cfg.Mode, cfg.Operation, cfg.Type, key, data, os.Stdout)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error processing data: %v\n", err)
 		os.Exit(1)
