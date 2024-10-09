@@ -42,7 +42,7 @@ func main() {
 	// Open the input file
 	inputFile, err := os.Open(cfg.File)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "opening input file: %v\n", err)
+		fmt.Fprintf(os.Stderr, "opening input file %q: %v\n", cfg.File, err)
 		os.Exit(1)
 	}
 	defer inputFile.Close()
