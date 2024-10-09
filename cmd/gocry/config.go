@@ -6,21 +6,18 @@ import (
 	"slices"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/idelchi/gocry/internal/encrypt"
 )
-
-type Directives struct {
-	Encrypt string
-	Decrypt string
-}
 
 // Config represents the configuration for the go-encryptor application.
 type Config struct {
-	Mode      string `validate:"oneof=file line"`
-	Operation string `validate:"oneof=encrypt decrypt"`
-	Key       string `validate:"required"`
-	File      string
-	Type      string `validate:"oneof=deterministic nondeterministic"`
-	GPG       bool
+	Mode       string `validate:"oneof=file line"`
+	Operation  string `validate:"oneof=encrypt decrypt"`
+	Key        string `validate:"required"`
+	File       string
+	Type       string `validate:"oneof=deterministic nondeterministic"`
+	GPG        bool
+	Directives encrypt.Directives
 }
 
 // Validate validates the configuration.

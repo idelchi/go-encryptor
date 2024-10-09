@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"github.com/idelchi/go-encryptor/pkg/stdin"
+	"github.com/idelchi/go-next-tag/pkg/stdin"
 	"github.com/idelchi/godyl/pkg/flagexp"
 )
 
@@ -41,8 +41,6 @@ func flags() {
 func parseFlags() (cfg Config, err error) {
 	flags()
 
-	// Parse the command-line flags
-	// pflag.Parse()
 	// Parse the command-line flags with suggestions enabled
 	if err := flagexp.ParseWithSuggestions(os.Args[1:]); err != nil {
 		return cfg, fmt.Errorf("parsing flags: %w", err)

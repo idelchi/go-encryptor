@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/idelchi/go-encryptor/internal/encrypt"
-	"github.com/idelchi/go-encryptor/pkg/stdin"
+	"github.com/idelchi/go-next-tag/pkg/stdin"
+	"github.com/idelchi/gocry/internal/encrypt"
 )
 
 func run(cfg Config) error {
@@ -30,10 +30,11 @@ func run(cfg Config) error {
 	defer data.Close()
 
 	encryptor := &encrypt.Encryptor{
-		Key:       key,
-		Operation: encrypt.Operation(cfg.Operation),
-		Mode:      encrypt.Mode(cfg.Mode),
-		Type:      encrypt.Type(cfg.Type),
+		Key:        key,
+		Operation:  encrypt.Operation(cfg.Operation),
+		Mode:       encrypt.Mode(cfg.Mode),
+		Type:       encrypt.Type(cfg.Type),
+		Directives: cfg.Directives,
 	}
 
 	processed, err := encryptor.Process(data, os.Stdout)

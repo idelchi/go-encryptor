@@ -1,9 +1,10 @@
-module github.com/idelchi/go-encryptor
+module github.com/idelchi/gocry
 
 go 1.23
 
 require (
 	github.com/go-playground/validator/v10 v10.22.1
+	github.com/idelchi/go-next-tag v0.0.0-20241009171622-1f3cb2ac9867
 	github.com/idelchi/godyl v0.0.0-20241009111335-9129154db2bc
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
