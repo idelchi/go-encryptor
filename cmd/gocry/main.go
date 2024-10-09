@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
 	"fmt"
 	"os"
 
@@ -26,12 +24,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	pwd, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
+	if err := run(cfg); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+
 		os.Exit(1)
 	}
-	fmt.Fprintf(os.Stderr, "running in folder %q\n", pwd)
 
 	key, err := os.ReadFile(cfg.Key)
 	if err != nil {
@@ -73,15 +70,4 @@ func main() {
 	if cfg.Mode == "line" && processed {
 		fmt.Fprintf(os.Stderr, "%sed lines in: %q\n", cfg.Operation, cfg.File)
 	}
-}
-
-func deriveKeyFromGPG(gpgKey string) ([]byte, error) {
-	gpgKeyDecoded, err := base64.StdEncoding.DecodeString(gpgKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode base64 gpg key: %w", err)
-	}
-
-	// Use SHA-256 to derive a 32-byte key for AES-256
-	hash := sha256.Sum256(gpgKeyDecoded)
-	return hash[:], nil
 }

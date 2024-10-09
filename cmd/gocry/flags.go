@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
+	"github.com/idelchi/go-encryptor/pg/stdin"
 	"github.com/idelchi/godyl/pkg/flagexp"
 )
 
@@ -70,13 +72,13 @@ func parseFlags() (cfg Config, err error) {
 }
 
 func validateInput(cfg *Config) error {
-	switch pflag.NArg() {
-	case 0:
-		return fmt.Errorf("missing required argument: input")
-	case 1:
-		cfg.File = pflag.Arg(0)
-	default:
+	switch args, isPiped := pflag.NArg(), stdin.IsPiped(); {
+	case args > 1:
 		return fmt.Errorf("too many arguments: %d", pflag.NArg())
+	case args == 0 && !isPiped:
+		return errors.New("input must be provided either via stdin and/or as a positional argument")
+	default:
+		cfg.File = pflag.Arg(0)
 	}
 
 	return nil
