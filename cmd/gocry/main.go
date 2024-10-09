@@ -25,6 +25,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	pwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Printf("running in folder %q\n", pwd)
+
 	key, err := os.ReadFile(cfg.Key)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "reading key file: %v\n", err)
