@@ -30,7 +30,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Printf("running in folder %q\n", pwd)
+	fmt.Fprintf(os.Stderr, "running in folder %q\n", pwd)
 
 	key, err := os.ReadFile(cfg.Key)
 	if err != nil {
