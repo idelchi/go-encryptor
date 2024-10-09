@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/idelchi/go-encryptor/internal/encrypt"
-	"github.com/idelchi/go-encryptor/pg/stdin"
+	"github.com/idelchi/go-encryptor/pkg/stdin"
 )
 
 func run(cfg Config) error {
@@ -27,14 +27,20 @@ func run(cfg Config) error {
 	if err != nil {
 		return fmt.Errorf("deriving key from GPG: %w", err)
 	}
+	defer data.Close()
 
-	// Use os.Stdout as the writer
-	processed, err := encrypt.Process(cfg.Mode, cfg.Operation, cfg.Type, key, data, os.Stdout)
+	encryptor := &encrypt.Encryptor{
+		Key:       key,
+		Operation: encrypt.Operation(cfg.Operation),
+		Mode:      encrypt.Mode(cfg.Mode),
+		Type:      encrypt.Type(cfg.Type),
+	}
+
+	processed, err := encryptor.Process(data, os.Stdout)
 	if err != nil {
-		fmt.Errorf("error processing data: %w", err)
-
 		return fmt.Errorf("processing data: %w", err)
 	}
+
 	if cfg.Mode == "file" {
 		fmt.Fprintf(os.Stderr, "%sed file: %q\n", cfg.Operation, cfg.File)
 	}
@@ -53,10 +59,8 @@ func loadData(file string) (data *os.File, err error) {
 		// Open the input file
 		data, err = os.Open(file)
 		if err != nil {
-			fmt.Errorf("opening input file %q: %w", file, err)
-			os.Exit(1)
+			return nil, fmt.Errorf("opening input file %q: %w", file, err)
 		}
-		defer data.Close()
 	}
 
 	return data, nil

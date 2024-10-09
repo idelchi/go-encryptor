@@ -3,9 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/idelchi/go-encryptor/internal/encrypt"
-	"github.com/idelchi/go-encryptor/pg/stdin"
 )
 
 // Global variable for CI stamping.
@@ -28,46 +25,5 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 
 		os.Exit(1)
-	}
-
-	key, err := os.ReadFile(cfg.Key)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "reading key file: %v\n", err)
-		os.Exit(1)
-	}
-
-	if cfg.GPG {
-		key, err = deriveKeyFromGPG(string(key))
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "deriving key from GPG: %v\n", err)
-			os.Exit(1)
-		}
-	}
-	var data *os.File
-
-	if stdin.IsPiped() {
-		data = os.Stdin
-	} else {
-		// Open the input file
-		data, err = os.Open(cfg.File)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "opening input file %q: %v\n", cfg.File, err)
-			os.Exit(1)
-		}
-		defer data.Close()
-	}
-
-	// Use os.Stdout as the writer
-	processed, err := encrypt.Process(cfg.Mode, cfg.Operation, cfg.Type, key, data, os.Stdout)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error processing data: %v\n", err)
-		os.Exit(1)
-	}
-	if cfg.Mode == "file" {
-		fmt.Fprintf(os.Stderr, "%sed file: %q\n", cfg.Operation, cfg.File)
-	}
-
-	if cfg.Mode == "line" && processed {
-		fmt.Fprintf(os.Stderr, "%sed lines in: %q\n", cfg.Operation, cfg.File)
 	}
 }

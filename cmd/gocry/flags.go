@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"github.com/idelchi/go-encryptor/pg/stdin"
+	"github.com/idelchi/go-encryptor/pkg/stdin"
 	"github.com/idelchi/godyl/pkg/flagexp"
 )
 

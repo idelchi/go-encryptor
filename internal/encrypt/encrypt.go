@@ -12,22 +12,60 @@ import (
 	"strings"
 )
 
+// Operation represents the encryption or decryption operation.
+type Operation string
+
+const (
+	// Encrypt operation.
+	Encrypt Operation = "encrypt"
+	// Decrypt operation.
+	Decrypt Operation = "decrypt"
+)
+
+// Type represents whether encryption is deterministic or not.
+type Type string
+
+const (
+	// Deterministic encryption uses a fixed IV derived from the key.
+	Deterministic Type = "deterministic"
+	// NonDeterministic encryption uses a random IV.
+	NonDeterministic Type = "nondeterministic"
+)
+
+// Mode represents the mode of operation.
+type Mode string
+
+const (
+	// Line mode processes each line of the input data.
+	Line Mode = "line"
+	// File mode processes the entire input data as a single block.
+	File Mode = "file"
+)
+
+// Encryptor handles encryption and decryption operations.
+type Encryptor struct {
+	Key       []byte
+	Operation Operation
+	Mode      Mode
+	Type      Type
+}
+
 // Process handles encryption and decryption based on the provided configuration.
 // It delegates to either processLines or processWholeFile depending on the mode.
-func Process(mode, operation, encryption string, key []byte, reader io.Reader, writer io.Writer) (bool, error) {
-	switch mode {
-	case "line":
-		return processLines(operation, encryption, key, reader, writer)
-	case "file":
-		return processWholeFile(operation, encryption, key, reader, writer)
+func (e *Encryptor) Process(reader io.Reader, writer io.Writer) (bool, error) {
+	switch e.Mode {
+	case Line:
+		return e.processLines(reader, writer)
+	case File:
+		return e.processWholeFile(reader, writer)
 	default:
-		return false, fmt.Errorf("invalid mode: %s", mode)
+		return false, fmt.Errorf("invalid mode: %s", e.Type)
 	}
 }
 
 // processLines processes each line of the input data, encrypting or decrypting lines
 // that contain the specific directive.
-func processLines(operation, encryption string, key []byte, reader io.Reader, writer io.Writer) (bool, error) {
+func (e *Encryptor) processLines(reader io.Reader, writer io.Writer) (bool, error) {
 	var processed bool
 
 	scanner := bufio.NewScanner(reader)
@@ -35,25 +73,22 @@ func processLines(operation, encryption string, key []byte, reader io.Reader, wr
 		line := scanner.Text()
 
 		switch {
-		case operation == "encrypt" && strings.HasSuffix(line, "### DIRECTIVE: ENCRYPT"):
-			encryptedLine, err := encryptData([]byte(line), key, encryption == "deterministic")
+		case e.Operation == Encrypt && strings.HasSuffix(line, "### DIRECTIVE: ENCRYPT"):
+			encryptedLine, err := e.encryptData([]byte(line))
 			if err != nil {
 				return processed, err
 			}
 
 			processed = true
-
 			fmt.Fprintf(writer, "### DIRECTIVE: DECRYPT: %s\n", encryptedLine)
-		case operation == "decrypt" && strings.HasPrefix(line, "### DIRECTIVE: DECRYPT: "):
-
+		case e.Operation == Decrypt && strings.HasPrefix(line, "### DIRECTIVE: DECRYPT: "):
 			encryptedData := strings.TrimPrefix(line, "### DIRECTIVE: DECRYPT: ")
-			decryptedLine, err := decryptData([]byte(encryptedData), key)
+			decryptedLine, err := e.decryptData([]byte(encryptedData))
 			if err != nil {
 				return processed, err
 			}
 
 			processed = true
-
 			fmt.Fprintln(writer, string(decryptedLine))
 		default:
 			fmt.Fprintln(writer, line)
@@ -67,22 +102,20 @@ func processLines(operation, encryption string, key []byte, reader io.Reader, wr
 }
 
 // processWholeFile processes the entire input data as a single encrypted or decrypted block.
-func processWholeFile(operation, encryption string, key []byte, reader io.Reader, writer io.Writer) (bool, error) {
-	switch operation {
-	case "encrypt":
-		return true, encryptStream(reader, writer, key, encryption == "deterministic")
-	case "decrypt":
-		return true, decryptStream(reader, writer, key)
+func (e *Encryptor) processWholeFile(reader io.Reader, writer io.Writer) (bool, error) {
+	switch e.Operation {
+	case Encrypt:
+		return true, e.encryptStream(reader, writer)
+	case Decrypt:
+		return true, e.decryptStream(reader, writer)
 	default:
-		return false, fmt.Errorf("invalid operation: %s", operation)
+		return false, fmt.Errorf("invalid operation")
 	}
 }
 
 // encryptData encrypts the given data using AES in CFB mode.
-// If deterministic is true, it uses a deterministic IV derived from the key;
-// otherwise, it uses a randomly generated IV.
-func encryptData(data, key []byte, deterministic bool) ([]byte, error) {
-	ciphertext, err := encryptBytes(data, key, deterministic)
+func (e *Encryptor) encryptData(data []byte) ([]byte, error) {
+	ciphertext, err := e.encryptBytes(data)
 	if err != nil {
 		return nil, err
 	}
@@ -90,18 +123,17 @@ func encryptData(data, key []byte, deterministic bool) ([]byte, error) {
 }
 
 // decryptData decrypts the given data using AES in CFB mode.
-// It expects the IV to be prepended to the ciphertext.
-func decryptData(data, key []byte) ([]byte, error) {
+func (e *Encryptor) decryptData(data []byte) ([]byte, error) {
 	ciphertext, err := base64.StdEncoding.DecodeString(string(data))
 	if err != nil {
 		return nil, fmt.Errorf("decoding base64: %w", err)
 	}
-	return decryptBytes(ciphertext, key)
+	return e.decryptBytes(ciphertext)
 }
 
 // encryptBytes encrypts the given byte slice and returns the ciphertext with IV prepended.
-func encryptBytes(data, key []byte, deterministic bool) ([]byte, error) {
-	block, err := aes.NewCipher(key)
+func (e *Encryptor) encryptBytes(data []byte) ([]byte, error) {
+	block, err := aes.NewCipher(e.Key)
 	if err != nil {
 		return nil, fmt.Errorf("creating cipher: %w", err)
 	}
@@ -109,8 +141,8 @@ func encryptBytes(data, key []byte, deterministic bool) ([]byte, error) {
 	ciphertext := make([]byte, aes.BlockSize+len(data))
 	iv := ciphertext[:aes.BlockSize]
 
-	if deterministic {
-		copy(iv, key[:aes.BlockSize])
+	if e.Type == Deterministic {
+		copy(iv, e.Key[:aes.BlockSize])
 	} else {
 		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 			return nil, fmt.Errorf("generating IV: %w", err)
@@ -124,12 +156,12 @@ func encryptBytes(data, key []byte, deterministic bool) ([]byte, error) {
 }
 
 // decryptBytes decrypts the given ciphertext (with IV prepended) and returns the plaintext.
-func decryptBytes(ciphertext, key []byte) ([]byte, error) {
+func (e *Encryptor) decryptBytes(ciphertext []byte) ([]byte, error) {
 	if len(ciphertext) < aes.BlockSize {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
 
-	block, err := aes.NewCipher(key)
+	block, err := aes.NewCipher(e.Key)
 	if err != nil {
 		return nil, fmt.Errorf("creating cipher: %w", err)
 	}
@@ -144,15 +176,15 @@ func decryptBytes(ciphertext, key []byte) ([]byte, error) {
 }
 
 // encryptStream reads from the reader, encrypts the data, and writes to the writer.
-func encryptStream(reader io.Reader, writer io.Writer, key []byte, deterministic bool) error {
-	block, err := aes.NewCipher(key)
+func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
+	block, err := aes.NewCipher(e.Key)
 	if err != nil {
 		return fmt.Errorf("creating cipher: %w", err)
 	}
 
 	var iv []byte
-	if deterministic {
-		iv = key[:aes.BlockSize]
+	if e.Type == Deterministic {
+		iv = e.Key[:aes.BlockSize]
 	} else {
 		iv = make([]byte, aes.BlockSize)
 		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
@@ -164,8 +196,8 @@ func encryptStream(reader io.Reader, writer io.Writer, key []byte, deterministic
 	base64Encoder := base64.NewEncoder(base64.StdEncoding, writer)
 	defer base64Encoder.Close()
 
-	// Write IV to the output (unencoded)
-	if !deterministic {
+	// Write IV to the output (unencoded) if non-deterministic
+	if e.Type == NonDeterministic {
 		if _, err := writer.Write(iv); err != nil {
 			return fmt.Errorf("writing IV: %w", err)
 		}
@@ -192,18 +224,23 @@ func encryptStream(reader io.Reader, writer io.Writer, key []byte, deterministic
 }
 
 // decryptStream reads from the reader, decrypts the data, and writes to the writer.
-func decryptStream(reader io.Reader, writer io.Writer, key []byte) error {
-	// Read IV from the input (if not deterministic)
-	iv := make([]byte, aes.BlockSize)
-	n, err := io.ReadFull(reader, iv)
-	if err != nil {
-		return fmt.Errorf("reading IV: %w", err)
-	}
-	if n < aes.BlockSize {
-		return fmt.Errorf("IV too short")
+func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
+	var iv []byte
+	if e.Type == Deterministic {
+		iv = e.Key[:aes.BlockSize]
+	} else {
+		// Read IV from the input (if not deterministic)
+		iv = make([]byte, aes.BlockSize)
+		n, err := io.ReadFull(reader, iv)
+		if err != nil {
+			return fmt.Errorf("reading IV: %w", err)
+		}
+		if n < aes.BlockSize {
+			return fmt.Errorf("IV too short")
+		}
 	}
 
-	block, err := aes.NewCipher(key)
+	block, err := aes.NewCipher(e.Key)
 	if err != nil {
 		return fmt.Errorf("creating cipher: %w", err)
 	}
