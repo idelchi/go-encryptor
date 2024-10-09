@@ -1,0 +1,36 @@
+services:
+  build:
+    build:
+      args:
+        - GO_MATCH_VERSION=local
+    pull_policy: if_not_present
+    image: idelchi/go-match:dev
+    container_name: go-match
+    hostname: go-match
+    user: user
+    volumes:
+      - .:/home/user/ws
+    extra_hosts:
+      - host:host-gateway
+    working_dir: /home/user/ws
+    networks:
+      - go-match-network
+
+  kit:
+    pull_policy: if_not_present
+    image: idelchi/devenv:latest
+    container_name: kit
+    hostname: kit
+    volumes:
+      - $PWD:/home/ci/ws
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    working_dir: /home/ci/ws
+
+# The default network used to connect the containers
+# Is not needed when the services are defined inside one project,
+# but can be used to connect external containers to the network
+networks:
+  go-match-network:
+    name: go-match-network
+    driver: bridge
