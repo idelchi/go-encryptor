@@ -32,8 +32,16 @@ Can be used as filters in git.
 
 ## Installation
 
+### From source
+
 ```sh
 go install github.com/idelchi/gocry@latest
+```
+
+## From [installation script](https://raw.githubusercontent.com/idelchi/gocry/refs/heads/dev/scripts/install.sh)
+
+```sh
+curl -sSL https://raw.githubusercontent.com/idelchi/gocry/refs/heads/dev/scripts/install.sh | sh
 ```
 
 ## Usage
