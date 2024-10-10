@@ -8,24 +8,29 @@ The program outputs the processed content to standard output (stdout).
 
 Can be used as filters in git.
 
-    [filter "encrypt:line"]
-        clean = "gocry -m lines -o encrypt -k ~/.secrets/key %f"
-        smudge = "gocry -m lines -o decrypt -k ~/.secrets/key %f %f"
-        required = true
+`.gitconfig`
 
-    [filter "encrypt:file"]
-        clean = "gocry -m file -o encrypt -k ~/.secrets/key %f"
-        smudge = "gocry -m file -o decrypt -k ~/.secrets/key %f %f"
-        required = true
+```toml
+[filter "encrypt:line"]
+    clean = "gocry -m lines -o encrypt -k ~/.secrets/key %f"
+    smudge = "gocry -m lines -o decrypt -k ~/.secrets/key %f %f"
+    required = true
 
-## Getting Started
+[filter "encrypt:file"]
+    clean = "gocry -m file -o encrypt -k ~/.secrets/key %f"
+    smudge = "gocry -m file -o decrypt -k ~/.secrets/key %f %f"
+    required = true
+```
 
-### Prerequisites
+`.gitattributes`
 
-- Go 1.23 or higher
-- Git
+```toml
+*                       filter=encrypt:line
 
-### Installation
+**/secrets/*            filter=encrypt:file
+```
+
+## Installation
 
 ```sh
 go install github.com/idelchi/gocry@latest
@@ -43,15 +48,18 @@ The available flags include:
 - `-o, --operation`: Operation to perform: "encrypt" or "decrypt" (default "encrypt")
 - `-k, --key`: Path to the key file (required)
 - `-t, --type`: Encryption type: "deterministic" or "nondeterministic" (default "nondeterministic")
-- `-s, --show`: Show the configuration and exit
+- `--gpg`: Whether a GPG key is used for encryption/decryption (default true)
+- `--directives.encrypt`: Directives for encryption (default "### DIRECTIVE: ENCRYPT")
+- `--directives.decrypt`: Directives for decryption (default "### DIRECTIVE: DECRYPT")
 - `--version`: Show the version information and exit
 - `-h, --help`: Show the help information and exit
+- `-s, --show`: Show the configuration and exit
 
 ### Examples
 
-#### Encrypt a File Using Nondeterministic Encryption
+#### Encrypt a File
 
-Encrypt `input.txt` using nondeterministic encryption and output the result to `encrypted.txt`:
+Encrypt `input.txt` output the result to `encrypted.txt`:
 
 ```sh
 gocry -k path/to/keyfile input.txt > encrypted.txt
@@ -70,15 +78,7 @@ gocry -o decrypt -k path/to/keyfile encrypted.txt > decrypted.txt
 Encrypt lines in `input.txt` that contain the directive `### DIRECTIVE: ENCRYPT` and output the result to `encrypted.txt`:
 
 ```sh
-gocry -m lines -k path/to/keyfile input.txt > encrypted.txt
-```
-
-#### Use Deterministic Encryption
-
-Encrypt `input.txt` using deterministic encryption:
-
-```sh
-gocry -t deterministic -k path/to/keyfile input.txt > encrypted.txt
+gocry -m line -k path/to/keyfile input.txt > encrypted.txt
 ```
 
 #### Show the Configuration
@@ -99,10 +99,12 @@ gocry --help
 
 ## Directives for Line-by-Line Encryption
 
-When using `--mode lines`, gocry processes only the lines that contain specific directives:
+When using `--mode line`, `gocry` processes only the lines that contain specific directives:
 
 - To encrypt a line, append `### DIRECTIVE: ENCRYPT` to the line.
 - To decrypt a line, it should start with `### DIRECTIVE: DECRYPT:` followed by the encrypted content.
+
+The directives themselves can be customized using the `--directives.encrypt` and `--directives.decrypt` flags.
 
 ### Example Input File (input.txt):
 
@@ -115,7 +117,7 @@ Another normal line.
 ### Encrypting the File:
 
 ```sh
-gocry -m lines -k path/to/keyfile input.txt > encrypted.txt
+gocry -m line -k path/to/keyfile input.txt > encrypted.txt
 ```
 
 ### Resulting Output (encrypted.txt):
@@ -129,7 +131,7 @@ Another normal line.
 ### Decrypting the File:
 
 ```sh
-gocry -m lines -o decrypt -k path/to/keyfile encrypted.txt > decrypted.txt
+gocry -m line -o decrypt -k path/to/keyfile encrypted.txt > decrypted.txt
 ```
 
 ### Resulting Output (decrypted.txt):

@@ -2,11 +2,11 @@ services:
   build:
     build:
       args:
-        - GO_MATCH_VERSION=local
+        - GOCRY_VERSION=local
     pull_policy: if_not_present
-    image: idelchi/go-match:dev
-    container_name: go-match
-    hostname: go-match
+    image: idelchi/gocry:dev
+    container_name: gocry
+    hostname: gocry
     user: user
     volumes:
       - .:/home/user/ws
@@ -14,7 +14,7 @@ services:
       - host:host-gateway
     working_dir: /home/user/ws
     networks:
-      - go-match-network
+      - gocry-network
 
   kit:
     pull_policy: if_not_present
@@ -31,6 +31,6 @@ services:
 # Is not needed when the services are defined inside one project,
 # but can be used to connect external containers to the network
 networks:
-  go-match-network:
-    name: go-match-network
+  gocry-network:
+    name: gocry-network
     driver: bridge

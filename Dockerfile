@@ -1,12 +1,12 @@
 #[=======================================================================[
-# Description : Docker image containing the go-encryptor binary
+# Description : Docker image containing the gocry binary
 #]=======================================================================]
 
 # Docker image repository to use. Use `docker.io` for public images.
 ARG IMAGE_BASE_REGISTRY
 
 ARG ALPINE_VERSION=3.20
-ARG GO_VERSION=1.23.0
+ARG GO_VERSION=1.23.3
 
 #### ---- Build ---- ####
 FROM ${IMAGE_BASE_REGISTRY}golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS build
@@ -35,10 +35,10 @@ RUN --mount=type=cache,target=${GOMODCACHE},uid=1001,gid=1001 \
     go mod download
 
 COPY . .
-ARG GO_ENCRYPTOR_VERSION="unofficial & built by unknown"
+ARG GOCRY_VERSION="unofficial & built by unknown"
 RUN --mount=type=cache,target=${GOMODCACHE},uid=1001,gid=1001 \
     --mount=type=cache,target=${GOCACHE},uid=1001,gid=1001 \
-    CGO_ENABLED=0 go install -ldflags="-s -w -X 'main.version=${GO_ENCRYPTOR_VERSION}'" ./...
+    CGO_ENABLED=0 go install -ldflags="-s -w -X 'main.version=${GOCRY_VERSION}'" ./...
 
 # Create User (Alpine)
 ARG USER=user
@@ -58,13 +58,13 @@ ARG USER=user
 # Copy artifacts from the build stage
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=build /go/bin/go-encryptor /go-encryptor
+COPY --from=build /go/bin/gocry /gocry
 
 USER ${USER}
 WORKDIR /home/${USER}
 
 # Clear the base image entrypoint
-ENTRYPOINT ["/go-encryptor"]
+ENTRYPOINT ["/gocry"]
 CMD [""]
 
 # Timezone
