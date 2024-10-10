@@ -45,10 +45,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: delete ${{github.ref_name}} release
-        run: gh release delete ${{github.ref_name}} --yes
-        continue-on-error: true
-
       - name: Set up Go
         uses: actions/setup-go@v5
 
