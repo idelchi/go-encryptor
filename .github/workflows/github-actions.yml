@@ -1,17 +1,12 @@
 name: gocry
-on: [push, pull_request, workflow_dispatch]
 
-env:
-  BRANCH: ${{ github.head_ref || github.ref_name }}
-  IMAGE: ${{ github.repository }}
+on:
+  push:
+    tags:
+      - "*"
 
 jobs:
-  # verify:
-  #   uses: idelchi/devenv/.github/workflows/devenv-actions.yml@dev
-  #   with:
-  #     image: idelchi/devenv:dev
-
-  release-tag:
+  release:
     permissions:
       contents: write
     runs-on: ubuntu-24.04
