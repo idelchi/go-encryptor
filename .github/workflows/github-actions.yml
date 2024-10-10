@@ -25,7 +25,7 @@ jobs:
 
       - name: delete v0.0 release
         run: |
-          gh release delete v0.0 --yes --cleanup-tag
+          gh release delete v0.0 --yes --cleanup-tag || true
           git tag v1.0
           git push origin v1.0
         continue-on-error: true
