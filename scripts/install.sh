@@ -54,7 +54,12 @@ tmp=$(mktemp)
 
 # Download and extract/install
 echo "Downloading $BINARY_NAME from $URL"
-curl -L -o $tmp $URL
+code=$(curl -L -o $tmp $URL)
+
+if [ "$code" != "200" ]; then
+  echo "Failed to download $URL"
+  return 1
+fi
 
 if [ "$FORMAT" = "tar.gz" ]; then
     tar -C $OUTPUT_DIR -xzf $tmp
@@ -63,7 +68,5 @@ else
 fi
 
 rm $tmp -rf
-
-echo $tmp
 
 echo "gocry installed to $OUTPUT_DIR"
