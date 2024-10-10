@@ -37,14 +37,23 @@ jobs:
           git push origin --delete ${{ env.TAG }}
         continue-on-error: true
 
-      - name: create ${{ env.TAG }} tag
-        run: |
-          git tag ${{ env.TAG }}
-          git push origin ${{ env.TAG }}
+      # - name: create ${{ env.TAG }} tag
+      #   run: |
+      #     git tag ${{ env.TAG }}
+      #     git push origin ${{ env.TAG }}
 
-      - name: run workflow for ${{ env.TAG }} tag
-        run: |
-          gh workflow run gocry --ref ${{ env.TAG }}
+      # - name: run workflow for ${{ env.TAG }} tag
+      #   run: |
+      #     gh workflow run gocry --ref ${{ env.TAG }}
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GORELEASER_CURRENT_TAG: "v0.0"
 
   release:
     permissions:
