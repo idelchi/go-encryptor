@@ -1,3 +1,0 @@
-This is a secret line 1 ### DIRECTIVE: ENCRYPT
-This is a normal line
-This is another secret line 2 ### DIRECTIVE: ENCRYPT

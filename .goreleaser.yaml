@@ -22,6 +22,12 @@ builds:
     ldflags:
       - -s -w -X main.version={{.Version}}
 
+    ignore:
+      - goarm: windows
+        goarch: arm
+      - goarm: windows
+        goarch: arm64
+
 archives:
   - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.
