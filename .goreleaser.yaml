@@ -6,16 +6,21 @@ before:
 
 builds:
   - main: ./cmd/gocry
+
     env:
       - CGO_ENABLED=0
+
     goos:
       - linux
       - windows
       - darwin
+
     goarch:
+      - "386"
       - amd64
       - arm
       - arm64
+
     goarm:
       - 6
       - 7
@@ -23,10 +28,12 @@ builds:
       - -s -w -X main.version={{.Version}}
 
     ignore:
-      - goarm: windows
+      - goos: windows
         goarch: arm
-      - goarm: windows
+      - goos: windows
         goarch: arm64
+      - goos: windows
+        goarch: "386"
 
 archives:
   - format: tar.gz
