@@ -16,6 +16,7 @@ jobs:
     if: github.ref == 'refs/heads/dev'
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: "v0.0"
 
     steps:
       - name: Checkout
@@ -23,12 +24,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: delete v0.0 release
+      - name: delete ${{ env.TAG }} release
         run: |
-          gh release delete v0.0 --yes --cleanup-tag || true
-          git tag v1.0
-          git push origin v1.0
+          gh release delete ${{ env.TAG }} --yes --cleanup-tag || true
         continue-on-error: true
+
+      - name: delete ${{ env.TAG }} release
+        run: |
+          gh release delete --yes --cleanup-tag || true
+          git tag ${{ env.TAG }}
+          git push origin
 
   release:
     permissions:
