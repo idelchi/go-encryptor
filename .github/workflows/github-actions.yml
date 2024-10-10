@@ -31,7 +31,6 @@ jobs:
 
       - name: delete ${{ env.TAG }} release
         run: |
-          gh release delete --yes --cleanup-tag || true
           git tag ${{ env.TAG }}
           git push origin
 
