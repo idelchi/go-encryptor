@@ -50,6 +50,9 @@ archives:
     files:
       - none*
 
+snapshot:
+  version_template: "{{ .Version }}"
+
 changelog:
   sort: asc
   filters:
