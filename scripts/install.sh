@@ -71,3 +71,4 @@ fi
 rm $tmp -rf
 
 echo "gocry installed to $OUTPUT_DIR"
+xxxx
