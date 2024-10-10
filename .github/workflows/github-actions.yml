@@ -41,6 +41,10 @@ jobs:
           git tag ${{ env.TAG }}
           git push origin ${{ env.TAG }}
 
+      - name: run workflow for ${{ env.TAG }} tag
+        run: |
+          gh workflow run gocry --ref ${{ env.TAG }}
+
   release:
     permissions:
       contents: write
