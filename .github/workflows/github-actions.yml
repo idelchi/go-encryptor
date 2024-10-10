@@ -12,6 +12,8 @@ jobs:
   #     image: idelchi/devenv:dev
 
   release-tag:
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/')
     steps:
