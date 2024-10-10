@@ -54,10 +54,11 @@ tmp=$(mktemp)
 
 # Download and extract/install
 echo "Downloading $BINARY_NAME from $URL"
-code=$(curl -L -o $tmp $URL)
+code=$(curl -L -o ${tmp} ${URL})
 
 if [ "$code" != "200" ]; then
   echo "Failed to download $URL"
+
   return 1
 fi
 
