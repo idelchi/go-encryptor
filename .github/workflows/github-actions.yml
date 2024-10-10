@@ -38,10 +38,10 @@ jobs:
           git push origin --delete ${{ env.TAG }}
         continue-on-error: true
 
-      # - name: create ${{ env.TAG }} tag
-      #   run: |
-      #     git tag ${{ env.TAG }}
-      #     git push origin ${{ env.TAG }}
+      - name: create ${{ env.TAG }} tag
+        run: |
+          git tag ${{ env.TAG }}
+          git push origin ${{ env.TAG }}
 
       # - name: run workflow for ${{ env.TAG }} tag
       #   run: |
