@@ -32,7 +32,7 @@ jobs:
 
       - name: delete ${{ env.TAG }} release
         run: |
-          git tag ${{ env.TAG }}
+          git tag -d ${{ env.TAG }}
           git push origin ${{ env.TAG }}
 
   release:
