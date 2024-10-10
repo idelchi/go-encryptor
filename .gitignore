@@ -12,3 +12,4 @@
 .cache
 .task
 dist/
+bin/
