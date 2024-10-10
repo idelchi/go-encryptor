@@ -45,7 +45,7 @@ jobs:
 
       - name: run workflow for ${{ env.TAG }} tag
         run: |
-          gh workflow run ${{ github.workflow }} --ref ${{ env.TAG }}
+          gh workflow run ${{ env.TAG }} --ref ${{ env.TAG }}
 
       # - name: Run GoReleaser
       #   uses: goreleaser/goreleaser-action@v6
