@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+BINARY="gocry"
+
 # Default values
 VERSION="v0.0"
 OUTPUT_DIR="./bin"
@@ -48,8 +50,8 @@ if [ "$OS" = "windows" ]; then
 fi
 
 # Construct the download URL
-BASE_URL="https://github.com/idelchi/gocry/releases/download"
-BINARY_NAME="gocry_${OS}_${ARCH}.${FORMAT}"
+BASE_URL="https://github.com/idelchi/${BINARY}/releases/download"
+BINARY_NAME="${BINARY}_${OS}_${ARCH}.${FORMAT}"
 URL="${BASE_URL}/${VERSION}/${BINARY_NAME}"
 
 tmp=$(mktemp)
@@ -72,4 +74,4 @@ fi
 
 rm -f $tmp
 
-echo "gocry installed to $OUTPUT_DIR"
+echo "${BINARY} installed to $OUTPUT_DIR"
