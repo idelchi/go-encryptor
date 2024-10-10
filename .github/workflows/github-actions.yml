@@ -34,7 +34,7 @@ jobs:
 
       - name: delete ${{ env.TAG }} tag
         run: |
-          git tag -d ${{ env.TAG }}
+          git tag --delete ${{ env.TAG }}
           git push origin --delete ${{ env.TAG }}
         continue-on-error: true
 
