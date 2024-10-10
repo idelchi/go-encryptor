@@ -33,7 +33,7 @@ jobs:
       - name: delete ${{ env.TAG }} tag
         run: |
           git tag -d ${{ env.TAG }}
-          git push origin ${{ env.TAG }}
+          git push origin --delete ${{ env.TAG }}
         continue-on-error: true
 
       - name: create ${{ env.TAG }} tag
