@@ -2,12 +2,12 @@
 set -e
 
 # Default values
-VERSION="latest"
-OUTPUT_DIR="/usr/local/bin"
+VERSION="v0.0"
+OUTPUT_DIR="./bin"
 
 # Usage function
 usage() {
-    echo "Usage: $0 [-v version] [-o output_directory]"
+    echo "Usage: $0 [-v version] [-o output]"
     exit 1
 }
 
@@ -24,12 +24,18 @@ done
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 
+case "$OS" in
+  cygwin_nt*) OS="windows" ;;
+  mingw*) OS="windows" ;;
+  msys_nt*) OS="windows" ;;
+esac
+
 case $ARCH in
-    x86_64) ARCH="x86_64" ;;
+    x86_64) ARCH="amd64" ;;
     armv6*) ARCH="armv6" ;;
     armv7*) ARCH="armv7" ;;
     aarch64) ARCH="arm64" ;;
-    i386) ARCH="i386" ;;
+    i386) ARCH="x86" ;;
     *) echo "Unsupported architecture: $ARCH" && exit 1 ;;
 esac
 
@@ -42,19 +48,22 @@ fi
 # Construct the download URL
 BASE_URL="https://github.com/idelchi/gocry/releases/download"
 BINARY_NAME="gocry_${OS}_${ARCH}.${FORMAT}"
-URL="${BASE_URL}/v${VERSION}/${BINARY_NAME}"
+URL="${BASE_URL}/${VERSION}/${BINARY_NAME}"
+
+tmp=$(mktemp)
 
 # Download and extract/install
 echo "Downloading $BINARY_NAME from $URL"
-curl -L -o /tmp/$BINARY_NAME $URL
+curl -L -o $tmp $URL
 
 if [ "$FORMAT" = "tar.gz" ]; then
-    tar -C $OUTPUT_DIR -xzf /tmp/$BINARY_NAME
+    tar -C $OUTPUT_DIR -xzf $tmp
 else
-    unzip -d $OUTPUT_DIR /tmp/$BINARY_NAME
+    unzip -d $OUTPUT_DIR $tmp
 fi
 
-# Cleanup
-rm /tmp/$BINARY_NAME
+rm $tmp -rf
+
+echo $tmp
 
 echo "gocry installed to $OUTPUT_DIR"
