@@ -13,6 +13,7 @@ jobs:
   tag:
     permissions:
       contents: write
+      actions: write
     runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/dev'
     env:
