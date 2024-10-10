@@ -68,6 +68,6 @@ else
     unzip -d $OUTPUT_DIR $tmp
 fi
 
-rm $tmp -rf
+rm -f $tmp
 
 echo "gocry installed to $OUTPUT_DIR"
