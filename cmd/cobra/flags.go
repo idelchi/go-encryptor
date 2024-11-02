@@ -16,7 +16,8 @@ func flags() *cobra.Command {
 	root := newRootCmd(cfg)
 
 	// Persistent flags shared across encrypt/decrypt commands
-	root.Flags().StringP("key", "k", "", "Path to the key file")
+	root.Flags().StringP("key", "k", "", "Encryption key")
+	root.Flags().StringP("key-file", "f", "", "Path to the key file with the encryption key")
 	root.Flags().StringP("mode", "m", "file", "Mode of operation: file or line")
 	root.Flags().BoolP("show", "s", false, "Show the configuration and exit")
 	root.Flags().StringP("encrypt", "e", "### DIRECTIVE: ENCRYPT", "Directives for encryption")
@@ -57,7 +58,7 @@ func validate(cfg *Config) error {
 	}
 
 	if err := cfg.Validate(); err != nil {
-		return fmt.Errorf("validating config: %w", err)
+		return fmt.Errorf("validating config: %w\nSee --help for more info on usage.", err)
 	}
 
 	return nil
@@ -65,6 +66,8 @@ func validate(cfg *Config) error {
 
 func newRootCmd(_ *Config) *cobra.Command {
 	root := &cobra.Command{
+		SilenceUsage:     true,
+		SilenceErrors:    true,
 		Version:          version,
 		Use:              "gonc [flags] command [flags]",
 		Short:            "File/line encryption utility",
@@ -124,7 +127,7 @@ func newDecryptCmd(cfg *Config) *cobra.Command {
 		Aliases: []string{"dec"},
 		Short:   "Decrypt files",
 		Long:    "Decrypt a file using the specified key. Output is printed to stdout.",
-		// Args:    cobra.ExactArgs(1),
+		Args:    cobra.ExactArgs(1),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			cfg.Operation = encrypt.Decrypt
 
@@ -147,12 +150,13 @@ func newGenerateCmd() *cobra.Command {
 		Use:     "generate",
 		Aliases: []string{"gen"},
 		Short:   "Generate a new encryption key",
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key, err := encrypt.GenerateKeyString()
 			if err != nil {
 				return fmt.Errorf("generating key: %w", err)
 			}
-			fmt.Println(key)
+			fmt.Printf(key)
 
 			return nil
 		},

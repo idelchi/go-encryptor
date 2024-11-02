@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -12,20 +11,23 @@ import (
 
 func processFiles(cfg *Config) error {
 	var key []byte
+	var err error
 
-	_, err := os.Stat(cfg.Key)
-	if errors.Is(err, os.ErrNotExist) {
-		printer.Stderrln("Key file %q does not exist, assuming the key is given as a string", cfg.Key)
-
-		key = []byte(cfg.Key)
-	} else {
-		key, err = os.ReadFile(cfg.Key)
+	switch {
+	case cfg.Key != "":
+		key, err = encrypt.DecodeKey(cfg.Key)
+	case cfg.KeyFile != "":
+		key, err = os.ReadFile(cfg.KeyFile)
 		if err != nil {
 			return fmt.Errorf("reading key file: %w", err)
 		}
+
+		key, err = encrypt.DecodeKey(string(key))
 	}
 
-	key, err = encrypt.DecodeKey(string(key))
+	if err != nil {
+		return fmt.Errorf("reading key: %w", err)
+	}
 
 	data, err := loadData(cfg.File)
 	if err != nil {
@@ -46,11 +48,11 @@ func processFiles(cfg *Config) error {
 	}
 
 	if cfg.Mode == "file" {
-		fmt.Fprintf(os.Stderr, "%sed file: %q\n", cfg.Operation, cfg.File)
+		printer.Stderrln("\n%sed file: %q", cfg.Operation, cfg.File)
 	}
 
 	if cfg.Mode == "line" && processed {
-		fmt.Fprintf(os.Stderr, "%sed lines in: %q\n", cfg.Operation, cfg.File)
+		printer.Stderrln("\n%sed lines in: %q", cfg.Operation, cfg.File)
 	}
 
 	return nil

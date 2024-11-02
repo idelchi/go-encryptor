@@ -6,8 +6,8 @@ import (
 )
 
 type Directives struct {
-	Encrypt string
-	Decrypt string
+	Encrypt string `mapstructure:"encrypt"`
+	Decrypt string `mapstructure:"decrypt"`
 }
 
 // Encryptor handles encryption and decryption operations.
