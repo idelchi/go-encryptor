@@ -4,6 +4,7 @@ go 1.23
 
 require (
 	github.com/go-playground/locales v0.14.1
+	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/idelchi/go-next-tag v0.0.0-20241009171622-1f3cb2ac9867
 	github.com/idelchi/godyl v0.0.0-20241031111404-dfec9af9fa07
@@ -16,7 +17,6 @@ require (
 	github.com/agnivade/levenshtein v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.6 // indirect
-	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

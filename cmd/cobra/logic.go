@@ -7,22 +7,28 @@ import (
 	"github.com/idelchi/go-next-tag/pkg/stdin"
 	"github.com/idelchi/gocry/internal/encrypt"
 	"github.com/idelchi/gocry/internal/printer"
+	"github.com/idelchi/gocry/pkg/key"
 )
 
 func processFiles(cfg *Config) error {
-	var key []byte
+	var encryptionKey []byte
 	var err error
 
 	switch {
 	case cfg.Key != "":
-		key, err = encrypt.DecodeKey(cfg.Key)
+		encryptionKey, err = key.Decode([]byte(cfg.Key))
 	case cfg.KeyFile != "":
-		key, err = os.ReadFile(cfg.KeyFile)
+		encryptionKey, err = os.ReadFile(cfg.KeyFile)
 		if err != nil {
 			return fmt.Errorf("reading key file: %w", err)
 		}
 
-		key, err = encrypt.DecodeKey(string(key))
+		encryptionKey, err = key.Decode(encryptionKey)
+	}
+
+	// Validate key length
+	if len(encryptionKey) != 32 {
+		return fmt.Errorf("invalid key length: got %d bytes, want 32", len(encryptionKey))
 	}
 
 	if err != nil {
@@ -36,7 +42,7 @@ func processFiles(cfg *Config) error {
 	defer data.Close()
 
 	encryptor := &encrypt.Encryptor{
-		Key:        key,
+		Key:        encryptionKey,
 		Operation:  encrypt.Operation(cfg.Operation),
 		Mode:       encrypt.Mode(cfg.Mode),
 		Directives: cfg.Directives,

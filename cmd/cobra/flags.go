@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/idelchi/gocry/internal/encrypt"
+	"github.com/idelchi/gocry/pkg/key"
 	"github.com/idelchi/godyl/pkg/pretty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -14,18 +15,20 @@ import (
 func flags() *cobra.Command {
 	cfg := &Config{}
 	root := newRootCmd(cfg)
+	encrypt := newEncryptCmd(cfg)
+	decrypt := newDecryptCmd(cfg)
+	generate := newGenerateCmd()
 
 	// Persistent flags shared across encrypt/decrypt commands
 	root.Flags().StringP("key", "k", "", "Encryption key")
 	root.Flags().StringP("key-file", "f", "", "Path to the key file with the encryption key")
+
 	root.Flags().StringP("mode", "m", "file", "Mode of operation: file or line")
 	root.Flags().BoolP("show", "s", false, "Show the configuration and exit")
 	root.Flags().StringP("encrypt", "e", "### DIRECTIVE: ENCRYPT", "Directives for encryption")
 	root.Flags().StringP("decrypt", "d", "### DIRECTIVE: DECRYPT", "Directives for decryption")
 
-	encrypt := newEncryptCmd(cfg)
-	decrypt := newDecryptCmd(cfg)
-	generate := newGenerateCmd()
+	root.MarkFlagsMutuallyExclusive("key", "key-file")
 
 	root.AddCommand(encrypt, decrypt, generate)
 
@@ -33,13 +36,13 @@ func flags() *cobra.Command {
 	root.SetVersionTemplate("{{ .Version }}\n")
 	root.Flags().SortFlags = false
 
-	generate.SetHelpFunc(func(command *cobra.Command, strings []string) {
-		command.Flags().MarkHidden("key")
-		command.Flags().MarkHidden("mode")
-		command.Flags().MarkHidden("encrypt")
-		command.Flags().MarkHidden("decrypt")
-		command.Parent().HelpFunc()(command, strings)
-	})
+	// generate.SetHelpFunc(func(command *cobra.Command, strings []string) {
+	// 	command.Flags().MarkHidden("key")
+	// 	command.Flags().MarkHidden("mode")
+	// 	command.Flags().MarkHidden("encrypt")
+	// 	command.Flags().MarkHidden("decrypt")
+	// 	command.Parent().HelpFunc()(command, strings)
+	// })
 
 	return root
 }
@@ -66,8 +69,8 @@ func validate(cfg *Config) error {
 
 func newRootCmd(_ *Config) *cobra.Command {
 	root := &cobra.Command{
-		SilenceUsage:     true,
-		SilenceErrors:    true,
+		// SilenceUsage:     true,
+		// SilenceErrors:    true,
 		Version:          version,
 		Use:              "gonc [flags] command [flags]",
 		Short:            "File/line encryption utility",
@@ -91,6 +94,8 @@ func newRootCmd(_ *Config) *cobra.Command {
 				return fmt.Errorf("failed to bind persistent flags: %w", err)
 			}
 
+			cmd.Root().ParseFlags(args)
+
 			return nil
 		},
 	}
@@ -108,14 +113,17 @@ func newEncryptCmd(cfg *Config) *cobra.Command {
 		Short:   "Encrypt files",
 		Long:    "Encrypt a file using the specified key. Output is printed to stdout.",
 		Args:    cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 			cfg.Operation = encrypt.Encrypt
+			cfg.File = args[0]
 
 			if err := validate(cfg); err != nil {
 				return err
 			}
 
-			cfg.File = args[0]
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			return processFiles(cfg)
 		},
 	}
@@ -130,6 +138,7 @@ func newDecryptCmd(cfg *Config) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			cfg.Operation = encrypt.Decrypt
+			cfg.File = args[0]
 
 			if err := validate(cfg); err != nil {
 				return err
@@ -138,8 +147,6 @@ func newDecryptCmd(cfg *Config) *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg.File = args[0]
-
 			return processFiles(cfg)
 		},
 	}
@@ -152,7 +159,7 @@ func newGenerateCmd() *cobra.Command {
 		Short:   "Generate a new encryption key",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			key, err := encrypt.GenerateKeyString()
+			key, err := key.GenerateHex(32)
 			if err != nil {
 				return fmt.Errorf("generating key: %w", err)
 			}
