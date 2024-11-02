@@ -13,13 +13,6 @@ const (
 // Type represents whether encryption is deterministic or not.
 type Type string
 
-const (
-	// Deterministic encryption uses a fixed IV derived from the key.
-	Deterministic Type = "deterministic"
-	// NonDeterministic encryption uses a random IV.
-	NonDeterministic Type = "nondeterministic"
-)
-
 // Mode represents the mode of operation.
 type Mode string
 

@@ -16,14 +16,9 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 		return fmt.Errorf("creating cipher: %w", err)
 	}
 
-	var iv []byte
-	if e.Type == Deterministic {
-		iv = e.Key[:aes.BlockSize]
-	} else {
-		iv = make([]byte, aes.BlockSize)
-		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-			return fmt.Errorf("generating IV: %w", err)
-		}
+	iv := make([]byte, aes.BlockSize)
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return fmt.Errorf("generating IV: %w", err)
 	}
 
 	stream := cipher.NewCFBEncrypter(block, iv)
@@ -31,10 +26,8 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 	defer base64Encoder.Close()
 
 	// Write IV to the output (unencoded) if non-deterministic
-	if e.Type == NonDeterministic {
-		if _, err := writer.Write(iv); err != nil {
-			return fmt.Errorf("writing IV: %w", err)
-		}
+	if _, err := writer.Write(iv); err != nil {
+		return fmt.Errorf("writing IV: %w", err)
 	}
 
 	buf := make([]byte, 4096)
@@ -59,19 +52,14 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 
 // decryptStream reads from the reader, decrypts the data, and writes to the writer.
 func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
-	var iv []byte
-	if e.Type == Deterministic {
-		iv = e.Key[:aes.BlockSize]
-	} else {
-		// Read IV from the input (if not deterministic)
-		iv = make([]byte, aes.BlockSize)
-		n, err := io.ReadFull(reader, iv)
-		if err != nil {
-			return fmt.Errorf("reading IV: %w", err)
-		}
-		if n < aes.BlockSize {
-			return fmt.Errorf("IV too short")
-		}
+	// Read IV from the input
+	iv := make([]byte, aes.BlockSize)
+	n, err := io.ReadFull(reader, iv)
+	if err != nil {
+		return fmt.Errorf("reading IV: %w", err)
+	}
+	if n < aes.BlockSize {
+		return fmt.Errorf("IV too short")
 	}
 
 	block, err := aes.NewCipher(e.Key)

@@ -18,12 +18,8 @@ func (e *Encryptor) encryptBytes(data []byte) ([]byte, error) {
 	ciphertext := make([]byte, aes.BlockSize+len(data))
 	iv := ciphertext[:aes.BlockSize]
 
-	if e.Type == Deterministic {
-		copy(iv, e.Key[:aes.BlockSize])
-	} else {
-		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-			return nil, fmt.Errorf("generating IV: %w", err)
-		}
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, fmt.Errorf("generating IV: %w", err)
 	}
 
 	stream := cipher.NewCFBEncrypter(block, iv)

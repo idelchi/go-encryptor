@@ -33,7 +33,6 @@ func run(cfg Config) error {
 		Key:        key,
 		Operation:  encrypt.Operation(cfg.Operation),
 		Mode:       encrypt.Mode(cfg.Mode),
-		Type:       encrypt.Type(cfg.Type),
 		Directives: cfg.Directives,
 	}
 

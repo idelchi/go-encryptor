@@ -15,7 +15,6 @@ type Encryptor struct {
 	Key        []byte
 	Operation  Operation
 	Mode       Mode
-	Type       Type
 	Directives Directives
 }
 
