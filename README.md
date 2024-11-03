@@ -46,13 +46,12 @@ gocry [flags] [file]
 
 The available flags include:
 
+- `-s, --show`: Show the configuration and exit
 - `-m, --mode`: Mode of operation: "file" or "line" (default "file")
-- `-o, --operation`: Operation to perform: "encrypt" or "decrypt" (default "encrypt")
-- `-k, --key`: Path to the key file (required)
-- `-t, --type`: Encryption type: "deterministic" or "nondeterministic" (default "nondeterministic")
-- `--gpg`: Whether a GPG key is used for encryption/decryption (default true)
-- `--directives.encrypt`: Directives for encryption (default "### DIRECTIVE: ENCRYPT")
-- `--directives.decrypt`: Directives for decryption (default "### DIRECTIVE: DECRYPT")
+- `-k, --key`: Key for encryption/decryption
+- `-f, --key-file`: Path to the key file
+- `--encrypt`: Directives for encryption (default "### DIRECTIVE: ENCRYPT")
+- `--decrypt`: Directives for decryption (default "### DIRECTIVE: DECRYPT")
 - `--version`: Show the version information and exit
 - `-h, --help`: Show the help information and exit
 - `-s, --show`: Show the configuration and exit
@@ -64,7 +63,7 @@ The available flags include:
 Encrypt `input.txt` output the result to `encrypted.txt`:
 
 ```sh
-gocry -k path/to/keyfile input.txt > encrypted.txt
+gocry -f path/to/keyfile encrypt input.txt > encrypted.txt.enc
 ```
 
 #### Decrypt a File
@@ -72,7 +71,7 @@ gocry -k path/to/keyfile input.txt > encrypted.txt
 Decrypt `encrypted.txt` using the same key and output the result to `decrypted.txt`:
 
 ```sh
-gocry -o decrypt -k path/to/keyfile encrypted.txt > decrypted.txt
+gocry -k path/to/keyfile decrypt encrypted.txt.enc > decrypted.txt.dec
 ```
 
 #### Encrypt Specific Lines in a File

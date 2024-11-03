@@ -22,9 +22,9 @@ type Config struct {
 	Show bool
 
 	Mode       string             `validate:"oneof=file line"`
-	Operation  encrypt.Operation  `validate:"oneof=encrypt decrypt"`
+	Operation  encrypt.Operation  `validate:"oneof=encrypt decrypt" mapstructure:"-"`
 	Key        Key                `mapstructure:",squash"`
-	File       string             `validate:"required"`
+	File       string             `validate:"required" mapstructure:"-"`
 	Directives encrypt.Directives `mapstructure:",squash"`
 }
 
