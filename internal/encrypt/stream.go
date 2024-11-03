@@ -9,27 +9,30 @@ import (
 	"io"
 )
 
-// encryptStream reads from the reader, encrypts the data, and writes to the writer.
 func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 	block, err := aes.NewCipher(e.Key)
 	if err != nil {
 		return fmt.Errorf("creating cipher: %w", err)
 	}
 
+	// Generate IV
 	iv := make([]byte, aes.BlockSize)
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return fmt.Errorf("generating IV: %w", err)
 	}
 
 	stream := cipher.NewCFBEncrypter(block, iv)
+
+	// Create base64 encoder first
 	base64Encoder := base64.NewEncoder(base64.StdEncoding, writer)
 	defer base64Encoder.Close()
 
-	// Write IV to the output (unencoded) if non-deterministic
-	if _, err := writer.Write(iv); err != nil {
+	// Write IV through the base64 encoder
+	if _, err := base64Encoder.Write(iv); err != nil {
 		return fmt.Errorf("writing IV: %w", err)
 	}
 
+	// Read and encrypt data
 	buf := make([]byte, 4096)
 	for {
 		n, err := reader.Read(buf)
@@ -50,11 +53,13 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 	return nil
 }
 
-// decryptStream reads from the reader, decrypts the data, and writes to the writer.
 func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
-	// Read IV from the input
+	// Create base64 decoder first
+	base64Decoder := base64.NewDecoder(base64.StdEncoding, reader)
+
+	// Read IV through the base64 decoder
 	iv := make([]byte, aes.BlockSize)
-	n, err := io.ReadFull(reader, iv)
+	n, err := io.ReadFull(base64Decoder, iv)
 	if err != nil {
 		return fmt.Errorf("reading IV: %w", err)
 	}
@@ -68,8 +73,8 @@ func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 	}
 
 	stream := cipher.NewCFBDecrypter(block, iv)
-	base64Decoder := base64.NewDecoder(base64.StdEncoding, reader)
 
+	// Read and decrypt data
 	buf := make([]byte, 4096)
 	for {
 		n, err := base64Decoder.Read(buf)
