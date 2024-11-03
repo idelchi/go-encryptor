@@ -24,7 +24,7 @@ Can be used as filters in git.
 
 `.gitattributes`
 
-```toml
+```sh
 *                       filter=encrypt:line
 
 **/secrets/*            filter=encrypt:file
