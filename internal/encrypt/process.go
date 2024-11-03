@@ -9,7 +9,7 @@ import (
 )
 
 // processLines processes each line of the input data in parallel when possible
-func (e *Encryptor) processLines(reader io.Reader, writer io.Writer) (bool, error) {
+func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel int) (bool, error) {
 	var processed bool
 	var mu sync.Mutex
 	var wg sync.WaitGroup
@@ -33,7 +33,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer) (bool, erro
 
 	// Process lines in parallel
 	results := make([]string, len(lines))
-	numWorkers := 4 // Adjust based on system capabilities
+	numWorkers := parallel // Adjust based on system capabilities
 
 	// Create work channel
 	workChan := make(chan int)

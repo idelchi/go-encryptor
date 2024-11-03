@@ -20,6 +20,8 @@ type Config struct {
 	// Show enables output display
 	Show bool
 
+	Parallel int `validate:"min=1" mapstructure:"parallel"`
+
 	Mode       string             `validate:"oneof=file line"`
 	Operation  encrypt.Operation  `validate:"oneof=encrypt decrypt" mapstructure:"-"`
 	Key        Key                `mapstructure:",squash"`

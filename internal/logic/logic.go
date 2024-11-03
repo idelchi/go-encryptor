@@ -49,6 +49,7 @@ func Run(cfg *config.Config) error {
 		Operation:  encrypt.Operation(cfg.Operation),
 		Mode:       encrypt.Mode(cfg.Mode),
 		Directives: cfg.Directives,
+		Parallel:   cfg.Parallel,
 	}
 
 	processed, err := encryptor.Process(data, os.Stdout)

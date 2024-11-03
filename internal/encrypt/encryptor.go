@@ -16,6 +16,7 @@ type Encryptor struct {
 	Operation  Operation
 	Mode       Mode
 	Directives Directives
+	Parallel   int
 }
 
 // Process handles encryption and decryption based on the provided configuration.
@@ -23,7 +24,7 @@ type Encryptor struct {
 func (e *Encryptor) Process(reader io.Reader, writer io.Writer) (bool, error) {
 	switch e.Mode {
 	case Line:
-		return e.processLines(reader, writer)
+		return e.processLines(reader, writer, e.Parallel)
 	case File:
 		return e.processWholeFile(reader, writer)
 	default:
