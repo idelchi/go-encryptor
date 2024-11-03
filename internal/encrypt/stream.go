@@ -4,7 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"io"
 )
@@ -15,31 +14,25 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 		return fmt.Errorf("creating cipher: %w", err)
 	}
 
-	// Generate IV
 	iv := make([]byte, aes.BlockSize)
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return fmt.Errorf("generating IV: %w", err)
 	}
 
-	stream := cipher.NewCFBEncrypter(block, iv)
-
-	// Create base64 encoder first
-	base64Encoder := base64.NewEncoder(base64.StdEncoding, writer)
-	defer base64Encoder.Close()
-
-	// Write IV through the base64 encoder
-	if _, err := base64Encoder.Write(iv); err != nil {
+	// Write IV directly
+	if _, err := writer.Write(iv); err != nil {
 		return fmt.Errorf("writing IV: %w", err)
 	}
 
-	// Read and encrypt data
+	stream := cipher.NewCFBEncrypter(block, iv)
 	buf := make([]byte, 4096)
+	encrypted := make([]byte, 4096) // Pre-allocate encryption buffer
+
 	for {
 		n, err := reader.Read(buf)
 		if n > 0 {
-			encrypted := make([]byte, n)
-			stream.XORKeyStream(encrypted, buf[:n])
-			if _, err := base64Encoder.Write(encrypted); err != nil {
+			stream.XORKeyStream(encrypted[:n], buf[:n])
+			if _, err := writer.Write(encrypted[:n]); err != nil {
 				return fmt.Errorf("writing encrypted data: %w", err)
 			}
 		}
@@ -54,12 +47,9 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 }
 
 func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
-	// Create base64 decoder first
-	base64Decoder := base64.NewDecoder(base64.StdEncoding, reader)
-
-	// Read IV through the base64 decoder
+	// Read IV directly (no base64 decoder)
 	iv := make([]byte, aes.BlockSize)
-	n, err := io.ReadFull(base64Decoder, iv)
+	n, err := io.ReadFull(reader, iv)
 	if err != nil {
 		return fmt.Errorf("reading IV: %w", err)
 	}
@@ -73,15 +63,14 @@ func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 	}
 
 	stream := cipher.NewCFBDecrypter(block, iv)
-
-	// Read and decrypt data
 	buf := make([]byte, 4096)
+	decrypted := make([]byte, 4096) // Pre-allocate decryption buffer
+
 	for {
-		n, err := base64Decoder.Read(buf)
+		n, err := reader.Read(buf)
 		if n > 0 {
-			decrypted := make([]byte, n)
-			stream.XORKeyStream(decrypted, buf[:n])
-			if _, err := writer.Write(decrypted); err != nil {
+			stream.XORKeyStream(decrypted[:n], buf[:n])
+			if _, err := writer.Write(decrypted[:n]); err != nil {
 				return fmt.Errorf("writing decrypted data: %w", err)
 			}
 		}

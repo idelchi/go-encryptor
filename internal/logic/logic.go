@@ -29,13 +29,13 @@ func Run(cfg *config.Config) error {
 		encryptionKey, err = key.FromHex(string(encryptionKey))
 	}
 
+	if err != nil {
+		return fmt.Errorf("reading key: %w", err)
+	}
+
 	// Validate key length
 	if len(encryptionKey) != 32 {
 		return fmt.Errorf("invalid key length: got %d bytes, want 32", len(encryptionKey))
-	}
-
-	if err != nil {
-		return fmt.Errorf("reading key: %w", err)
 	}
 
 	data, err := loadData(cfg.File)
