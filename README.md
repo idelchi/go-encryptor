@@ -10,7 +10,7 @@ Can be used as filters in git.
 
 `.gitconfig`
 
-```toml
+```gitconfig
 [filter "encrypt:line"]
     clean = "gocry -k ~/.secrets/key -m lines encrypt %f"
     smudge = "gocry -k ~/.secrets/key  -m lines decrypt %f"
