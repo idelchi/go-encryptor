@@ -26,7 +26,6 @@ Can be used as filters in git.
 
 ```gitattributes
 *                       filter=encrypt:line
-
 **/secrets/*            filter=encrypt:file
 ```
 
