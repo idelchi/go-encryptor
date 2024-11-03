@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/idelchi/gocry/pkg/validator"
+	"github.com/idelchi/gogen/pkg/validator"
 )
 
 // registerExclusive adds a custom validator ensuring two fields are mutually exclusive.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/idelchi/gocry/internal/encrypt"
-	"github.com/idelchi/gocry/pkg/validator"
+	"github.com/idelchi/gogen/pkg/validator"
 )
 
 // ErrUsage indicates an error in command-line usage or configuration.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/idelchi/gocry/internal/encrypt"
-	"github.com/idelchi/gocry/pkg/validator"
+	"github.com/idelchi/gogen/pkg/validator"
 )
 
 var ErrUsage = errors.New("usage error")
