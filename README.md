@@ -79,7 +79,7 @@ gocry -k path/to/keyfile decrypt encrypted.txt.enc > decrypted.txt.dec
 Encrypt lines in `input.txt` that contain the directive `### DIRECTIVE: ENCRYPT` and output the result to `encrypted.txt`:
 
 ```sh
-gocry -m line -k path/to/keyfile input.txt > encrypted.txt
+gocry -m line -k path/to/keyfile encrypt input.txt > encrypted.txt
 ```
 
 #### Show the Configuration
@@ -87,7 +87,7 @@ gocry -m line -k path/to/keyfile input.txt > encrypted.txt
 Display the current configuration based on the provided flags:
 
 ```sh
-gocry -s -k path/to/keyfile input.txt
+gocry -s -k path/to/keyfile encrypt input.txt
 ```
 
 #### Display Help Information
@@ -118,7 +118,7 @@ Another normal line.
 ### Encrypting the File:
 
 ```sh
-gocry -m line -k path/to/keyfile input.txt > encrypted.txt
+gocry -m line -k path/to/keyfile encrypt input.txt > encrypted.txt
 ```
 
 ### Resulting Output (encrypted.txt):
@@ -132,7 +132,7 @@ Another normal line.
 ### Decrypting the File:
 
 ```sh
-gocry -m line -o decrypt -k path/to/keyfile encrypted.txt > decrypted.txt
+gocry -k path/to/keyfile -m line decrypt encrypted.txt > decrypted.txt
 ```
 
 ### Resulting Output (decrypted.txt):
@@ -143,36 +143,10 @@ This line will be encrypted. ### DIRECTIVE: ENCRYPT
 Another normal line.
 ```
 
-## Notes on Encryption Types
-
-### Deterministic Encryption (`--type deterministic`):
-
-- Uses a fixed initialization vector (IV) derived from the key.
-- Encrypting the same content multiple times produces the same ciphertext.
-- Useful when you need consistent encryption results for the same input.
-
-### Nondeterministic Encryption (`--type nondeterministic`):
-
-- Uses a randomly generated IV.
-- Encrypting the same content multiple times produces different ciphertexts.
-- Provides better security by ensuring that identical plaintexts encrypt to different ciphertexts.
-
 ## For More Details
 
 To display a comprehensive list of flags and their descriptions, run:
 
 ```sh
 gocry --help
-```
-
-## Under the Hood
-
-gocry uses AES encryption in CFB (Cipher Feedback) mode. The key provided should be of appropriate length for AES (16, 24, or 32 bytes for AES-128, AES-192, or AES-256 respectively).
-
-## Generating a Key
-
-You can generate a key using OpenSSL or any other cryptographic library. Here's an example using OpenSSL to generate a 256-bit (32-byte) key:
-
-```sh
-openssl rand -out keyfile -base64 32
 ```
