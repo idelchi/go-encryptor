@@ -30,6 +30,8 @@ github.com/idelchi/go-next-tag v0.0.0-20241009171622-1f3cb2ac9867 h1:uGIXx5BTlpC
 github.com/idelchi/go-next-tag v0.0.0-20241009171622-1f3cb2ac9867/go.mod h1:bhIHGQZRMpjSwNM8JXYthVx/ZwYnNi80MUurUji7PAA=
 github.com/idelchi/godyl v0.0.0-20241031111404-dfec9af9fa07 h1:11bJic28cE0Q303BE1Z1RtqCMWQnCgkKVeTWcsuUblM=
 github.com/idelchi/godyl v0.0.0-20241031111404-dfec9af9fa07/go.mod h1:DIhpZicd/+uw59Um3MkNMG3c8qdRxzTX4nTua6EZxdY=
+github.com/idelchi/gogen v0.1.0-beta.0.20241103125644-5a723a3fab20 h1:PDx+jEcPaOslaZsDSbSkYHWU1u9HOQTwMUflOB1SKyY=
+github.com/idelchi/gogen v0.1.0-beta.0.20241103125644-5a723a3fab20/go.mod h1:9kN8E6xnRBvtcL0ZjvuOtbQ63RUFCcKZiz/bu6x0VhA=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=

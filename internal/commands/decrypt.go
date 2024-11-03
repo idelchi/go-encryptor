@@ -1,0 +1,30 @@
+package commands
+
+import (
+	"github.com/spf13/cobra"
+
+	"github.com/idelchi/gocry/internal/config"
+	"github.com/idelchi/gocry/internal/encrypt"
+	"github.com/idelchi/gocry/internal/logic"
+)
+
+func NewDecryptCommand(cfg *config.Config) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "decrypt file",
+		Aliases: []string{"dec"},
+		Short:   "Decrypt files",
+		Long:    "Decrypt a file using the specified key. Output is printed to stdout.",
+		Args:    cobra.ExactArgs(1),
+		PreRunE: func(_ *cobra.Command, args []string) error {
+			cfg.Operation = encrypt.Decrypt
+			cfg.File = args[0]
+
+			return validate(cfg, cfg)
+		},
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return logic.Run(cfg)
+		},
+	}
+
+	return cmd
+}

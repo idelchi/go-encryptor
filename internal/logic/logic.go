@@ -1,29 +1,30 @@
-package main
+package logic
 
 import (
 	"fmt"
 	"os"
 
 	"github.com/idelchi/go-next-tag/pkg/stdin"
+	"github.com/idelchi/gocry/internal/config"
 	"github.com/idelchi/gocry/internal/encrypt"
 	"github.com/idelchi/gocry/internal/printer"
-	"github.com/idelchi/gocry/pkg/key"
+	"github.com/idelchi/gogen/pkg/key"
 )
 
-func processFiles(cfg *Config) error {
+func Run(cfg *config.Config) error {
 	var encryptionKey []byte
 	var err error
 
 	switch {
-	case cfg.Key != "":
-		encryptionKey, err = key.Decode([]byte(cfg.Key))
-	case cfg.KeyFile != "":
-		encryptionKey, err = os.ReadFile(cfg.KeyFile)
+	case cfg.Key.String != "":
+		encryptionKey, err = key.FromHex(cfg.Key.String)
+	case cfg.Key.File != "":
+		encryptionKey, err = os.ReadFile(cfg.Key.File)
 		if err != nil {
 			return fmt.Errorf("reading key file: %w", err)
 		}
 
-		encryptionKey, err = key.Decode(encryptionKey)
+		encryptionKey, err = key.FromHex(string(encryptionKey))
 	}
 
 	// Validate key length
