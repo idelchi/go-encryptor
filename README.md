@@ -10,21 +10,21 @@ Can be used as filters in git.
 
 `.gitconfig`
 
-```toml
+```sh
 [filter "encrypt:line"]
-    clean = "gocry -m lines -o encrypt -k ~/.secrets/key %f"
-    smudge = "gocry -m lines -o decrypt -k ~/.secrets/key %f %f"
+    clean = "gocry -k ~/.secrets/key -m lines encrypt %f"
+    smudge = "gocry -k ~/.secrets/key  -m lines decrypt %f"
     required = true
 
 [filter "encrypt:file"]
-    clean = "gocry -m file -o encrypt -k ~/.secrets/key %f"
-    smudge = "gocry -m file -o decrypt -k ~/.secrets/key %f %f"
+    clean = "gocry -f ~/.secrets/key -m file encrypt  %f"
+    smudge = "gocry -f ~/.secrets/key -m file decrypt %f"
     required = true
 ```
 
 `.gitattributes`
 
-```toml
+```sh
 *                       filter=encrypt:line
 
 **/secrets/*            filter=encrypt:file
