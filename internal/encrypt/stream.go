@@ -8,12 +8,16 @@ import (
 	"io"
 )
 
+// encryptStream encrypts data from reader to writer using AES-CFB mode.
+// It prepends the randomly generated IV to the encrypted output.
+// The encryption is done in chunks to maintain constant memory usage.
 func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 	block, err := aes.NewCipher(e.Key)
 	if err != nil {
 		return fmt.Errorf("creating cipher: %w", err)
 	}
 
+	// Generate a random IV (Initialization Vector)
 	iv := make([]byte, aes.BlockSize)
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return fmt.Errorf("generating IV: %w", err)
@@ -25,8 +29,9 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 	}
 
 	stream := cipher.NewCFBEncrypter(block, iv)
+	// Use fixed-size buffers for reading and encryption
 	buf := make([]byte, 4096)
-	encrypted := make([]byte, 4096) // Pre-allocate encryption buffer
+	encrypted := make([]byte, 4096)
 
 	for {
 		n, err := reader.Read(buf)
@@ -46,8 +51,11 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 	return nil
 }
 
+// decryptStream decrypts data from reader to writer using AES-CFB mode.
+// It expects the IV to be prepended to the encrypted data.
+// The decryption is done in chunks to maintain constant memory usage.
 func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
-	// Read IV directly (no base64 decoder)
+	// Read the prepended IV
 	iv := make([]byte, aes.BlockSize)
 	n, err := io.ReadFull(reader, iv)
 	if err != nil {
@@ -63,8 +71,9 @@ func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 	}
 
 	stream := cipher.NewCFBDecrypter(block, iv)
+	// Use fixed-size buffers for reading and decryption
 	buf := make([]byte, 4096)
-	decrypted := make([]byte, 4096) // Pre-allocate decryption buffer
+	decrypted := make([]byte, 4096)
 
 	for {
 		n, err := reader.Read(buf)

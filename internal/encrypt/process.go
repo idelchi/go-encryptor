@@ -8,7 +8,9 @@ import (
 	"sync"
 )
 
-// processLines processes each line of the input data in parallel when possible
+// processLines processes each line of the input data in parallel when possible.
+// It maintains the original line order in the output while leveraging parallel processing.
+// Returns a boolean indicating if any encryption/decryption was performed and any error encountered.
 func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel int) (bool, error) {
 	var processed bool
 	var mu sync.Mutex
@@ -21,7 +23,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 	}
 	outputChan := make(chan lineOutput)
 
-	// Read all lines first since we need to maintain order
+	// Read all lines first to maintain output order
 	var lines []string
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -31,15 +33,13 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 		return processed, fmt.Errorf("scanning error: %v", err)
 	}
 
-	// Process lines in parallel
+	// Initialize result storage and channels
 	results := make([]string, len(lines))
-	numWorkers := parallel // Adjust based on system capabilities
-
-	// Create work channel
+	numWorkers := parallel
 	workChan := make(chan int)
 	errChan := make(chan error)
 
-	// Start workers
+	// Start worker goroutines for parallel processing
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go func() {
@@ -48,6 +48,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 				line := lines[idx]
 				var result string
 
+				// Process each line based on operation type and directives
 				switch {
 				case e.Operation == Encrypt && strings.HasSuffix(line, e.Directives.Encrypt):
 					encryptedLine, err := e.encryptData([]byte(line))
@@ -81,7 +82,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 		}()
 	}
 
-	// Send work
+	// Distribute work to workers
 	go func() {
 		for i := range lines {
 			workChan <- i
@@ -89,19 +90,19 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 		close(workChan)
 	}()
 
-	// Wait for completion or error
+	// Wait for completion and close channels
 	go func() {
 		wg.Wait()
 		close(errChan)
 		close(outputChan)
 	}()
 
-	// Check for errors
+	// Check for processing errors
 	if err := <-errChan; err != nil {
 		return processed, err
 	}
 
-	// Write results in order
+	// Write results maintaining original order
 	for _, line := range results {
 		if _, err := fmt.Fprintln(writer, line); err != nil {
 			return processed, err
@@ -111,7 +112,9 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 	return processed, nil
 }
 
-// processWholeFile processes the entire input data as a single encrypted or decrypted block.
+// processWholeFile processes the entire input as a single block of data.
+// It's used when line-by-line processing is not required.
+// Returns true if processing was performed and any error encountered.
 func (e *Encryptor) processWholeFile(reader io.Reader, writer io.Writer) (bool, error) {
 	switch e.Operation {
 	case Encrypt:

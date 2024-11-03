@@ -8,6 +8,7 @@ import (
 	"github.com/idelchi/gocry/internal/logic"
 )
 
+// NewEncryptCommand creates a new cobra command for the encrypt operation.
 func NewEncryptCommand(cfg *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "encrypt file",

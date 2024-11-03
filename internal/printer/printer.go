@@ -1,3 +1,4 @@
+// Package printer provides a simple way to print messages to the standard output and standard error streams.
 package printer
 
 import (
