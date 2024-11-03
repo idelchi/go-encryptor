@@ -10,7 +10,7 @@ Can be used as filters in git.
 
 `.gitconfig`
 
-```sh
+```toml
 [filter "encrypt:line"]
     clean = "gocry -k ~/.secrets/key -m lines encrypt %f"
     smudge = "gocry -k ~/.secrets/key  -m lines decrypt %f"
@@ -24,7 +24,7 @@ Can be used as filters in git.
 
 `.gitattributes`
 
-```sh
+```toml
 *                       filter=encrypt:line
 
 **/secrets/*            filter=encrypt:file
@@ -50,8 +50,8 @@ The available flags include:
 - `-m, --mode`: Mode of operation: "file" or "line" (default "file")
 - `-k, --key`: Key for encryption/decryption
 - `-f, --key-file`: Path to the key file
-- `--encrypt`: Directives for encryption (default "### DIRECTIVE: ENCRYPT")
-- `--decrypt`: Directives for decryption (default "### DIRECTIVE: DECRYPT")
+- `--encrypt`: Directives for encryption (default `### DIRECTIVE: ENCRYPT`)
+- `--decrypt`: Directives for decryption (default `### DIRECTIVE: DECRYPT`)
 - `--version`: Show the version information and exit
 - `-h, --help`: Show the help information and exit
 - `-s, --show`: Show the configuration and exit
