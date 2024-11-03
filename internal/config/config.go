@@ -12,8 +12,7 @@ import (
 var ErrUsage = errors.New("usage error")
 
 type Key struct {
-	// `validate:"hexadecimal,len=64|hexadecimal,len=32"`
-	String string `mask:"fixed" validate:"exclusive=File" mapstructure:"key" label:"--key"`
+	String string `mask:"fixed" validate:"hexadecimal,len=64,exclusive=File" mapstructure:"key" label:"--key"`
 	File   string `validate:"exclusive=String" mapstructure:"key-file" label:"--key-file"`
 }
 

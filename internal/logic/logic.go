@@ -12,8 +12,10 @@ import (
 )
 
 func Run(cfg *config.Config) error {
-	var encryptionKey []byte
-	var err error
+	var (
+		encryptionKey []byte
+		err           error
+	)
 
 	switch {
 	case cfg.Key.String != "":

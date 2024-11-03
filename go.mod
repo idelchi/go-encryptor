@@ -5,21 +5,19 @@ go 1.23.0
 toolchain go1.23.2
 
 require (
-	github.com/go-playground/validator/v10 v10.22.1
 	github.com/idelchi/go-next-tag v0.0.0-20241009171622-1f3cb2ac9867
 	github.com/idelchi/godyl v0.0.0-20241031111404-dfec9af9fa07
 	github.com/idelchi/gogen v0.1.0-beta.0.20241103125644-5a723a3fab20
 	github.com/spf13/cobra v1.8.1
-	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
 )
 
 require (
-	github.com/agnivade/levenshtein v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.6 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.22.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -28,11 +26,11 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/showa-93/go-mask v0.6.2 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
