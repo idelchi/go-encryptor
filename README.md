@@ -6,6 +6,9 @@ It supports file encryption and line-by-line encryption based on directives with
 
 The program outputs the processed content to standard output (stdout).
 
+If the input is given as stdin (which is how git filters work), the input is read from stdin and the
+filename is used only for logging.
+
 Can be used as filters in git.
 
 `.gitconfig`

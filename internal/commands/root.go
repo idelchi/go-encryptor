@@ -1,43 +1,22 @@
 package commands
 
 import (
-	"fmt"
 	"runtime"
-	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/idelchi/gocry/internal/config"
+	"github.com/idelchi/gocry/pkg/cobraext"
 )
 
 // NewRootCommand creates the root command with common configuration.
 // It sets up environment variable binding and flag handling.
 func NewRootCommand(cfg *config.Config, version string) *cobra.Command {
-	root := &cobra.Command{
-		Version:          version,
-		SilenceUsage:     true,
-		SilenceErrors:    true,
-		Use:              "gocry [flags] command [flags]",
-		Short:            "File/line encryption utility",
-		Long:             "gocry is a utility for encrypting and decrypting files or lines of text.",
-		TraverseChildren: true,
-		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
-			viper.SetEnvPrefix(cmd.Root().Name())
-			viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
-			viper.AutomaticEnv()
+	root := cobraext.NewDefaultRootCommand(version)
 
-			if err := viper.BindPFlags(cmd.Root().Flags()); err != nil {
-				return fmt.Errorf("binding root flags: %w", err)
-			}
-
-			if err := viper.BindPFlags(cmd.Flags()); err != nil {
-				return fmt.Errorf("binding command flags: %w", err)
-			}
-
-			return nil
-		},
-	}
+	root.Use = "gocry [flags] command [flags]"
+	root.Short = "File/line encryption utility"
+	root.Long = "gocry is a utility for encrypting and decrypting files or lines of text."
 
 	root.Flags().BoolP("show", "s", false, "Show the configuration and exit")
 	root.Flags().IntP("parallel", "j", runtime.NumCPU(), "Number of parallel workers")
@@ -48,11 +27,6 @@ func NewRootCommand(cfg *config.Config, version string) *cobra.Command {
 	root.Flags().StringP("decrypt", "d", "### DIRECTIVE: DECRYPT", "Directives for decryption")
 
 	root.AddCommand(NewEncryptCommand(cfg), NewDecryptCommand(cfg))
-
-	root.CompletionOptions.DisableDefaultCmd = true
-	root.Flags().SortFlags = false
-
-	root.SetVersionTemplate("{{ .Version }}\n")
 
 	return root
 }

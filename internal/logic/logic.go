@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/idelchi/go-next-tag/pkg/stdin"
 	"github.com/idelchi/gocry/internal/config"
 	"github.com/idelchi/gocry/internal/encrypt"
 	"github.com/idelchi/gocry/internal/printer"
@@ -78,6 +79,10 @@ func Run(cfg *config.Config) error {
 
 // loadData returns a file handle for the input data.
 func loadData(file string) (*os.File, error) {
+	if stdin.IsPiped() {
+		return os.Stdin, nil
+	}
+
 	data, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("opening input file %q: %w", file, err)
