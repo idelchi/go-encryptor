@@ -19,7 +19,7 @@ func NewDefaultRootCommand(version string) *cobra.Command {
 		Short:            "File/line encryption utility",
 		Long:             "gocry is a utility for encrypting and decrypting files or lines of text.",
 		TraverseChildren: true, // TODO(Idelchi): Breaks suggestions, see below.
-		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			viper.SetEnvPrefix(cmd.Root().Name())
 			viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 			viper.AutomaticEnv()

@@ -8,36 +8,34 @@ before:
     - go mod tidy
 
 builds:
-  - main: ./cmd/gocry
+  env:
+    - CGO_ENABLED=0
 
-    env:
-      - CGO_ENABLED=0
+  goos:
+    - linux
+    - windows
+    - darwin
 
-    goos:
-      - linux
-      - windows
-      - darwin
+  goarch:
+    - 386
+    - amd64
+    - arm
+    - arm64
 
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
+  goarm:
+    - 6
+    - 7
 
-    goarm:
-      - 6
-      - 7
+  ldflags:
+    - -s -w -X main.version={{.Version}}
 
-    ldflags:
-      - -s -w -X main.version={{.Version}}
-
-    ignore:
-      - goos: windows
-        goarch: arm
-      - goos: windows
-        goarch: arm64
-      - goos: windows
-        goarch: 386
+  ignore:
+    - goos: windows
+      goarch: arm
+    - goos: windows
+      goarch: arm64
+    - goos: windows
+      goarch: 386
 
 archives:
   - format: tar.gz
