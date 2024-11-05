@@ -19,5 +19,9 @@ func setFileAndValidate(cfg *config.Config, args []string) error {
 		return fmt.Errorf("validating configuration: %w", err)
 	}
 
+	if cfg.Key.String == "" && cfg.Key.File == "" {
+		return fmt.Errorf("%w: missing key: specify either --key or --key-file", config.ErrUsage)
+	}
+
 	return nil
 }

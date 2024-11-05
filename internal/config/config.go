@@ -14,7 +14,7 @@ var ErrUsage = errors.New("usage error")
 // Key represents an encryption key configuration.
 type Key struct {
 	// String is a hexadecimal key string
-	String string `label:"--key" mapstructure:"key" mask:"fixed" validate:"omitempty,hexadecimal,len=64,exclusive=File"`
+	String string `label:"--key" mapstructure:"key" mask:"fixed" validate:"omitempty,exclusive=File,hexadecimal,len=64"`
 
 	// File is a path to a file containing a hexadecimal key string
 	File string `label:"--key-file" mapstructure:"key-file" validate:"exclusive=String"`
