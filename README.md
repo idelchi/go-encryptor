@@ -9,7 +9,8 @@
 
 It supports both file encryption and line-by-line encryption based on directives within the file.
 
-The tool can read the file from stdin and write the encrypted/decrypted content to stdout, making it suitable for use as a filter in git.
+The tool can read the file from stdin and write the encrypted/decrypted content to stdout,
+making it suitable for use as a filter in git.
 
 ## Installation
 
