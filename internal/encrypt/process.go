@@ -16,7 +16,7 @@ var ErrProcessing = errors.New("processing error")
 // It maintains the original line order in the output while leveraging parallel processing.
 // Returns a boolean indicating if any encryption/decryption was performed and any error encountered.
 //
-//nolint:funlen,gocognit
+//nolint:funlen,gocognit,cyclop
 func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel int) (bool, error) {
 	// Read all lines first to maintain output order
 	var lines []string
@@ -64,6 +64,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 
 						return
 					}
+
 					result = fmt.Sprintf("%s: %s", e.Directives.Decrypt, string(encryptedLine))
 					wasProcessed = true
 
@@ -73,6 +74,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 					decryptedLine, err := e.decryptData([]byte(encryptedData))
 					if err != nil {
 						errChan <- err
+
 						return
 					}
 					result = string(decryptedLine)
@@ -93,6 +95,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 		for i := range lines {
 			workChan <- i
 		}
+
 		close(workChan)
 	}()
 
@@ -116,9 +119,11 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 
 	// Check if any line was processed
 	anyProcessed := false
+
 	for _, processed := range processedStatus {
 		if processed {
 			anyProcessed = true
+
 			break
 		}
 	}
@@ -136,6 +141,6 @@ func (e *Encryptor) processWholeFile(reader io.Reader, writer io.Writer) (bool, 
 	case Decrypt:
 		return true, e.decryptStream(reader, writer)
 	default:
-		return false, fmt.Errorf("invalid operation")
+		return false, fmt.Errorf("%w: invalid operation", ErrProcessing)
 	}
 }

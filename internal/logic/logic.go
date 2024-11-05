@@ -15,6 +15,8 @@ import (
 // Run executes the main encryption/decryption logic based on the provided configuration.
 // It handles key loading, input data loading, and processes the data according to the
 // specified mode and operation.
+//
+// nolint: cyclop
 func Run(cfg *config.Config) error {
 	var (
 		encryptionKey []byte
@@ -53,8 +55,8 @@ func Run(cfg *config.Config) error {
 	// Initialize encryptor with configuration
 	encryptor := &encrypt.Encryptor{
 		Key:        encryptionKey,
-		Operation:  encrypt.Operation(cfg.Operation),
-		Mode:       encrypt.Mode(cfg.Mode),
+		Operation:  cfg.Operation,
+		Mode:       cfg.Mode,
 		Directives: cfg.Directives,
 		Parallel:   cfg.Parallel,
 	}

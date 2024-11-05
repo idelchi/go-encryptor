@@ -39,6 +39,7 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 		n, err := reader.Read(buf)
 		if n > 0 {
 			stream.XORKeyStream(encrypted[:n], buf[:n])
+
 			if _, err := writer.Write(encrypted[:n]); err != nil {
 				return fmt.Errorf("writing encrypted data: %w", err)
 			}
@@ -62,10 +63,12 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 	// Read the prepended IV
 	initializationVector := make([]byte, aes.BlockSize)
+
 	n, err := io.ReadFull(reader, initializationVector)
 	if err != nil {
 		return fmt.Errorf("reading IV: %w", err)
 	}
+
 	if n < aes.BlockSize {
 		return fmt.Errorf("%w: IV too short", ErrProcessing)
 	}
@@ -77,8 +80,10 @@ func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 
 	stream := cipher.NewCFBDecrypter(block, initializationVector)
 	// Use fixed-size buffers for reading and decryption
-	buf := make([]byte, 4096)
-	decrypted := make([]byte, 4096)
+	const bufferSize = 4096
+
+	buf := make([]byte, bufferSize)
+	decrypted := make([]byte, bufferSize)
 
 	for {
 		n, err := reader.Read(buf)
@@ -88,12 +93,15 @@ func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 				return fmt.Errorf("writing decrypted data: %w", err)
 			}
 		}
+
 		if err == io.EOF {
 			break
 		}
+
 		if err != nil {
 			return fmt.Errorf("reading encrypted data: %w", err)
 		}
 	}
+
 	return nil
 }
