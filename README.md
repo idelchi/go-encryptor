@@ -1,36 +1,15 @@
 # gocry
 
-gocry is a command-line utility for encrypting and decrypting files using a specified key.
+[![Go Reference](https://pkg.go.dev/badge/github.com/idelchi/gocry.svg)](https://pkg.go.dev/github.com/idelchi/gocry)
+[![Go Report Card](https://goreportcard.com/badge/github.com/idelchi/gocry)](https://goreportcard.com/report/github.com/idelchi/gocry)
+[![Build Status](https://github.com/idelchi/gocry/actions/workflows/github-actions.yml/badge.svg)](https://github.com/idelchi/gocry/actions/workflows/github-actions.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-It supports file encryption and line-by-line encryption based on directives within the file.
+`gocry` is a command-line utility for encrypting and decrypting files using a specified key.
 
-The program outputs the processed content to standard output (stdout).
+It supports both file encryption and line-by-line encryption based on directives within the file.
 
-If the input is given as stdin (which is how git filters work), the input is read from stdin and the
-filename is used only for logging.
-
-Can be used as filters in git.
-
-`.gitconfig`
-
-```gitconfig
-[filter "encrypt:line"]
-    clean = "gocry -k ~/.secrets/key -m lines encrypt %f"
-    smudge = "gocry -k ~/.secrets/key  -m lines decrypt %f"
-    required = true
-
-[filter "encrypt:file"]
-    clean = "gocry -f ~/.secrets/key -m file encrypt  %f"
-    smudge = "gocry -f ~/.secrets/key -m file decrypt %f"
-    required = true
-```
-
-`.gitattributes`
-
-```gitattributes
-*                       filter=encrypt:line
-**/secrets/*            filter=encrypt:file
-```
+The tool can read the file from stdin and write the encrypted/decrypted content to stdout, making it suitable for use as a filter in git.
 
 ## Installation
 
@@ -52,70 +31,82 @@ curl -sSL https://raw.githubusercontent.com/idelchi/gocry/refs/heads/dev/install
 gocry [flags] command [flags]
 ```
 
-The available flags include:
+### Global Flags and Environment Variables
 
-- `-s, --show`: Show the configuration and exit
-- `-m, --mode`: Mode of operation: "file" or "line" (default "file")
-- `-k, --key`: Key for encryption/decryption
-- `-f, --key-file`: Path to the key file
-- `--encrypt`: Directives for encryption (default `### DIRECTIVE: ENCRYPT`)
-- `--decrypt`: Directives for decryption (default `### DIRECTIVE: DECRYPT`)
-- `--version`: Show the version information and exit
-- `-h, --help`: Show the help information and exit
-- `-s, --show`: Show the configuration and exit
+| Flag             | Environment Variable      | Description                         | Default                  |
+| ---------------- | ------------------------- | ----------------------------------- | ------------------------ |
+| `-s, --show`     | `GOCRY_SHOW`              | Show the configuration and exit     | `false`                  |
+| `-m, --mode`     | `GOCRY_MODE`              | Mode of operation: "file" or "line" | `file`                   |
+| `-k, --key`      | `GOCRY_KEY`               | Key for encryption/decryption       | -                        |
+| `-f, --key-file` | `GOCRY_KEY_FILE`          | Path to the key file                | -                        |
+| `--encrypt`      | `GOCRY_ENCRYPT_DIRECTIVE` | Directive for encryption            | `### DIRECTIVE: ENCRYPT` |
+| `--decrypt`      | `GOCRY_DECRYPT_DIRECTIVE` | Directive for decryption            | `### DIRECTIVE: DECRYPT` |
+| `-h, --help`     | -                         | Help for gocry                      | -                        |
+| `-v, --version`  | -                         | Version for gocry                   | -                        |
 
-### Examples
+### Commands
 
-#### Encrypt a File
+#### `encrypt` - Encrypt content
 
-Encrypt `input.txt` output the result to `encrypted.txt`:
+Encrypt a file or specific lines within a file.
+
+Examples:
 
 ```sh
+# Encrypt an entire file
 gocry -f path/to/keyfile encrypt input.txt > encrypted.txt.enc
+
+# Encrypt specific lines in a file
+gocry -f path/to/keyfile -m line encrypt input.txt > encrypted.txt
 ```
 
-#### Decrypt a File
+#### `decrypt` - Decrypt content
 
-Decrypt `encrypted.txt` using the same key and output the result to `decrypted.txt`:
+Decrypt a file or specific lines within a file.
+
+Examples:
 
 ```sh
-gocry -k path/to/keyfile decrypt encrypted.txt.enc > decrypted.txt.dec
+# Decrypt an entire file
+gocry -f path/to/keyfile decrypt encrypted.txt.enc > decrypted.txt.dec
+
+# Decrypt specific lines in a file
+gocry -f path/to/keyfile -m line decrypt encrypted.txt > decrypted.txt
 ```
 
-#### Encrypt Specific Lines in a File
+### Git Integration
 
-Encrypt lines in `input.txt` that contain the directive `### DIRECTIVE: ENCRYPT` and output the result to `encrypted.txt`:
+gocry can be used as a filter in git for automatic encryption/decryption of files.
 
-```sh
-gocry -m line -k path/to/keyfile encrypt input.txt > encrypted.txt
+When stdin is given, gocry reads the file from stdin (using the file arguments for logging),
+and writes the encrypted/decrypted content to stdout.
+
+**.gitconfig:**
+
+```gitconfig
+[filter "encrypt:line"]
+    clean = "gocry -f ~/.secrets/key -m line encrypt %f"
+    smudge = "gocry -f ~/.secrets/key  -m line decrypt %f"
+    required = true
+
+[filter "encrypt:file"]
+    clean = "gocry -f ~/.secrets/key -m file encrypt  %f"
+    smudge = "gocry -f ~/.secrets/key -m file decrypt %f"
+    required = true
 ```
 
-#### Show the Configuration
+**.gitattributes:**
 
-Display the current configuration based on the provided flags:
-
-```sh
-gocry -s -k path/to/keyfile encrypt input.txt
+```gitattributes
+*                       filter=encrypt:line
+**/secrets/*            filter=encrypt:file
 ```
 
-#### Display Help Information
+### Line-by-Line Encryption
 
-Show detailed help information:
+When using `--mode line`, gocry processes only lines containing specific directives:
 
-```sh
-gocry --help
-```
-
-## Directives for Line-by-Line Encryption
-
-When using `--mode line`, `gocry` processes only the lines that contain specific directives:
-
-- To encrypt a line, append `### DIRECTIVE: ENCRYPT` to the line.
-- To decrypt a line, it should start with `### DIRECTIVE: DECRYPT:` followed by the encrypted content.
-
-The directives themselves can be customized using the `--directives.encrypt` and `--directives.decrypt` flags.
-
-### Example Input File (input.txt)
+**Input Example:**
 
 ```text
 This is a normal line.
@@ -123,13 +114,7 @@ This line will be encrypted. ### DIRECTIVE: ENCRYPT
 Another normal line.
 ```
 
-### Encrypting the File
-
-```sh
-gocry -m line -k path/to/keyfile encrypt input.txt > encrypted.txt
-```
-
-### Resulting Output (encrypted.txt)
+**After Encryption:**
 
 ```text
 This is a normal line.
@@ -137,13 +122,7 @@ This is a normal line.
 Another normal line.
 ```
 
-### Decrypting the File
-
-```sh
-gocry -k path/to/keyfile -m line decrypt encrypted.txt > decrypted.txt
-```
-
-### Resulting Output (decrypted.txt)
+**After Decryption:**
 
 ```text
 This is a normal line.
@@ -151,10 +130,9 @@ This line will be encrypted. ### DIRECTIVE: ENCRYPT
 Another normal line.
 ```
 
-## For More Details
-
-To display a comprehensive list of flags and their descriptions, run:
+For detailed help on any command:
 
 ```sh
 gocry --help
+gocry <command> --help
 ```

@@ -13,6 +13,7 @@ func (e *Encryptor) encryptData(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return []byte(base64.StdEncoding.EncodeToString(ciphertext)), nil
 }
 
@@ -24,5 +25,6 @@ func (e *Encryptor) decryptData(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("decoding base64: %w", err)
 	}
+
 	return e.decryptBytes(ciphertext)
 }

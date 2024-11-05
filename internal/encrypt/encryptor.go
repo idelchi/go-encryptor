@@ -45,6 +45,6 @@ func (e *Encryptor) Process(reader io.Reader, writer io.Writer) (bool, error) {
 	case File:
 		return e.processWholeFile(reader, writer)
 	default:
-		return false, fmt.Errorf("invalid mode: %s", e.Mode)
+		return false, fmt.Errorf("invalid mode: %s", e.Mode) //nolint: err113
 	}
 }

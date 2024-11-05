@@ -18,20 +18,22 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 	}
 
 	// Generate a random IV (Initialization Vector)
-	iv := make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	initializationVector := make([]byte, aes.BlockSize)
+	if _, err := io.ReadFull(rand.Reader, initializationVector); err != nil {
 		return fmt.Errorf("generating IV: %w", err)
 	}
 
 	// Write IV directly
-	if _, err := writer.Write(iv); err != nil {
+	if _, err := writer.Write(initializationVector); err != nil {
 		return fmt.Errorf("writing IV: %w", err)
 	}
 
-	stream := cipher.NewCFBEncrypter(block, iv)
+	stream := cipher.NewCFBEncrypter(block, initializationVector)
 	// Use fixed-size buffers for reading and encryption
-	buf := make([]byte, 4096)
-	encrypted := make([]byte, 4096)
+	const bufferSize = 4096
+
+	buf := make([]byte, bufferSize)
+	encrypted := make([]byte, bufferSize)
 
 	for {
 		n, err := reader.Read(buf)
@@ -41,13 +43,16 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 				return fmt.Errorf("writing encrypted data: %w", err)
 			}
 		}
+
 		if err == io.EOF {
 			break
 		}
+
 		if err != nil {
 			return fmt.Errorf("reading data: %w", err)
 		}
 	}
+
 	return nil
 }
 
@@ -56,13 +61,13 @@ func (e *Encryptor) encryptStream(reader io.Reader, writer io.Writer) error {
 // The decryption is done in chunks to maintain constant memory usage.
 func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 	// Read the prepended IV
-	iv := make([]byte, aes.BlockSize)
-	n, err := io.ReadFull(reader, iv)
+	initializationVector := make([]byte, aes.BlockSize)
+	n, err := io.ReadFull(reader, initializationVector)
 	if err != nil {
 		return fmt.Errorf("reading IV: %w", err)
 	}
 	if n < aes.BlockSize {
-		return fmt.Errorf("IV too short")
+		return fmt.Errorf("%w: IV too short", ErrProcessing)
 	}
 
 	block, err := aes.NewCipher(e.Key)
@@ -70,7 +75,7 @@ func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 		return fmt.Errorf("creating cipher: %w", err)
 	}
 
-	stream := cipher.NewCFBDecrypter(block, iv)
+	stream := cipher.NewCFBDecrypter(block, initializationVector)
 	// Use fixed-size buffers for reading and decryption
 	buf := make([]byte, 4096)
 	decrypted := make([]byte, 4096)

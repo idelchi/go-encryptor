@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/idelchi/go-next-tag v0.0.0-20241009171622-1f3cb2ac9867
-	github.com/idelchi/gogen v0.0.0-20241105114842-ebba170f8507
+	github.com/idelchi/gogen v0.0.0-20241105121434-33bff46b48cb
 	github.com/spf13/cobra v1.8.1
 )
 

@@ -39,7 +39,7 @@ func (e *Encryptor) encryptBytes(data []byte) ([]byte, error) {
 func (e *Encryptor) decryptBytes(ciphertext []byte) ([]byte, error) {
 	// Verify minimum length requirement for IV
 	if len(ciphertext) < aes.BlockSize {
-		return nil, fmt.Errorf("ciphertext too short") //nolint: err113
+		return nil, fmt.Errorf("%w: ciphertext too short", ErrProcessing)
 	}
 
 	block, err := aes.NewCipher(e.Key)

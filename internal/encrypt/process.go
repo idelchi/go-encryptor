@@ -15,15 +15,19 @@ var ErrProcessing = errors.New("processing error")
 // processLines processes each line of the input data in parallel when possible.
 // It maintains the original line order in the output while leveraging parallel processing.
 // Returns a boolean indicating if any encryption/decryption was performed and any error encountered.
+//
+//nolint:funlen,gocognit
 func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel int) (bool, error) {
 	// Read all lines first to maintain output order
 	var lines []string
+
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
+
 	if err := scanner.Err(); err != nil {
-		return false, fmt.Errorf("%w: scanning error: %v", ErrProcessing, err)
+		return false, fmt.Errorf("%w: scanning error: %w", ErrProcessing, err)
 	}
 
 	// Initialize result storage and channels
@@ -34,17 +38,22 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 
 	// Track processing status per line
 	processedStatus := make([]bool, len(lines))
+
 	var waitGroup sync.WaitGroup
 
 	// Start worker goroutines for parallel processing
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		waitGroup.Add(1)
 		go func() {
 			defer waitGroup.Done()
+
 			for idx := range workChan {
 				line := lines[idx]
-				var result string
-				var wasProcessed bool
+
+				var (
+					result       string
+					wasProcessed bool
+				)
 
 				// Process each line based on operation type and directives
 				switch {
@@ -52,6 +61,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 					encryptedLine, err := e.encryptData([]byte(line))
 					if err != nil {
 						errChan <- err
+
 						return
 					}
 					result = fmt.Sprintf("%s: %s", e.Directives.Decrypt, string(encryptedLine))
@@ -59,6 +69,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 
 				case e.Operation == Decrypt && strings.HasPrefix(line, fmt.Sprintf("%s: ", e.Directives.Decrypt)):
 					encryptedData := strings.TrimPrefix(line, fmt.Sprintf("%s: ", e.Directives.Decrypt))
+
 					decryptedLine, err := e.decryptData([]byte(encryptedData))
 					if err != nil {
 						errChan <- err
