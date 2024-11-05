@@ -44,6 +44,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 	// Start worker goroutines for parallel processing
 	for range numWorkers {
 		waitGroup.Add(1)
+
 		go func() {
 			defer waitGroup.Done()
 
@@ -68,8 +69,8 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 					result = fmt.Sprintf("%s: %s", e.Directives.Decrypt, string(encryptedLine))
 					wasProcessed = true
 
-				case e.Operation == Decrypt && strings.HasPrefix(line, fmt.Sprintf("%s: ", e.Directives.Decrypt)):
-					encryptedData := strings.TrimPrefix(line, fmt.Sprintf("%s: ", e.Directives.Decrypt))
+				case e.Operation == Decrypt && strings.HasPrefix(line, e.Directives.Decrypt+": "):
+					encryptedData := strings.TrimPrefix(line, e.Directives.Decrypt+": ")
 
 					decryptedLine, err := e.decryptData([]byte(encryptedData))
 					if err != nil {
@@ -77,6 +78,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 
 						return
 					}
+
 					result = string(decryptedLine)
 					wasProcessed = true
 
@@ -113,7 +115,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 	// Write results maintaining original order
 	for _, line := range results {
 		if _, err := fmt.Fprintln(writer, line); err != nil {
-			return false, fmt.Errorf("%w: writing error: %v", ErrProcessing, err)
+			return false, fmt.Errorf("%w: writing error: %w", ErrProcessing, err)
 		}
 	}
 

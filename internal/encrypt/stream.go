@@ -89,6 +89,7 @@ func (e *Encryptor) decryptStream(reader io.Reader, writer io.Writer) error {
 		n, err := reader.Read(buf)
 		if n > 0 {
 			stream.XORKeyStream(decrypted[:n], buf[:n])
+
 			if _, err := writer.Write(decrypted[:n]); err != nil {
 				return fmt.Errorf("writing decrypted data: %w", err)
 			}

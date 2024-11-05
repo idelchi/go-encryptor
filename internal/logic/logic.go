@@ -4,6 +4,7 @@ package logic
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/idelchi/go-next-tag/pkg/stdin"
 	"github.com/idelchi/gocry/internal/config"
@@ -16,7 +17,7 @@ import (
 // It handles key loading, input data loading, and processes the data according to the
 // specified mode and operation.
 //
-// nolint: cyclop
+//nolint:cyclop
 func Run(cfg *config.Config) error {
 	var (
 		encryptionKey []byte
@@ -41,8 +42,9 @@ func Run(cfg *config.Config) error {
 	}
 
 	// Ensure key meets AES-256 requirement
-	if len(encryptionKey) != 32 {
-		return fmt.Errorf("invalid key length: got %d bytes, want 32", len(encryptionKey))
+	const keySize = 32
+	if len(encryptionKey) != keySize {
+		return fmt.Errorf("%w: invalid key length: got %d bytes, want %d", config.ErrUsage, len(encryptionKey), keySize)
 	}
 
 	// Load input data from stdin or file
@@ -85,7 +87,7 @@ func loadData(file string) (*os.File, error) {
 		return os.Stdin, nil
 	}
 
-	data, err := os.Open(file)
+	data, err := os.Open(filepath.Clean(file))
 	if err != nil {
 		return nil, fmt.Errorf("opening input file %q: %w", file, err)
 	}
