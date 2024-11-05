@@ -2,27 +2,20 @@ package encrypt
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 	"sync"
 )
 
+// ErrProcessing indicates an error during processing.
+var ErrProcessing = errors.New("processing error")
+
 // processLines processes each line of the input data in parallel when possible.
 // It maintains the original line order in the output while leveraging parallel processing.
 // Returns a boolean indicating if any encryption/decryption was performed and any error encountered.
 func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel int) (bool, error) {
-	var processed bool
-	var mu sync.Mutex
-	var wg sync.WaitGroup
-
-	// Channel for ordered output
-	type lineOutput struct {
-		line  string
-		index int
-	}
-	outputChan := make(chan lineOutput)
-
 	// Read all lines first to maintain output order
 	var lines []string
 	scanner := bufio.NewScanner(reader)
@@ -30,7 +23,7 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 		lines = append(lines, scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
-		return processed, fmt.Errorf("scanning error: %v", err)
+		return false, fmt.Errorf("%w: scanning error: %v", ErrProcessing, err)
 	}
 
 	// Initialize result storage and channels
@@ -39,14 +32,19 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 	workChan := make(chan int)
 	errChan := make(chan error)
 
+	// Track processing status per line
+	processedStatus := make([]bool, len(lines))
+	var waitGroup sync.WaitGroup
+
 	// Start worker goroutines for parallel processing
 	for i := 0; i < numWorkers; i++ {
-		wg.Add(1)
+		waitGroup.Add(1)
 		go func() {
-			defer wg.Done()
+			defer waitGroup.Done()
 			for idx := range workChan {
 				line := lines[idx]
 				var result string
+				var wasProcessed bool
 
 				// Process each line based on operation type and directives
 				switch {
@@ -56,10 +54,8 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 						errChan <- err
 						return
 					}
-					mu.Lock()
-					processed = true
-					mu.Unlock()
 					result = fmt.Sprintf("%s: %s", e.Directives.Decrypt, string(encryptedLine))
+					wasProcessed = true
 
 				case e.Operation == Decrypt && strings.HasPrefix(line, fmt.Sprintf("%s: ", e.Directives.Decrypt)):
 					encryptedData := strings.TrimPrefix(line, fmt.Sprintf("%s: ", e.Directives.Decrypt))
@@ -68,16 +64,15 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 						errChan <- err
 						return
 					}
-					mu.Lock()
-					processed = true
-					mu.Unlock()
 					result = string(decryptedLine)
+					wasProcessed = true
 
 				default:
 					result = line
 				}
 
 				results[idx] = result
+				processedStatus[idx] = wasProcessed
 			}
 		}()
 	}
@@ -92,24 +87,32 @@ func (e *Encryptor) processLines(reader io.Reader, writer io.Writer, parallel in
 
 	// Wait for completion and close channels
 	go func() {
-		wg.Wait()
+		waitGroup.Wait()
 		close(errChan)
-		close(outputChan)
 	}()
 
 	// Check for processing errors
 	if err := <-errChan; err != nil {
-		return processed, err
+		return false, err
 	}
 
 	// Write results maintaining original order
 	for _, line := range results {
 		if _, err := fmt.Fprintln(writer, line); err != nil {
-			return processed, err
+			return false, fmt.Errorf("%w: writing error: %v", ErrProcessing, err)
 		}
 	}
 
-	return processed, nil
+	// Check if any line was processed
+	anyProcessed := false
+	for _, processed := range processedStatus {
+		if processed {
+			anyProcessed = true
+			break
+		}
+	}
+
+	return anyProcessed, nil
 }
 
 // processWholeFile processes the entire input as a single block of data.

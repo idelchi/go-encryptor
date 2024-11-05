@@ -40,10 +40,16 @@ Can be used as filters in git.
 go install github.com/idelchi/gocry@latest
 ```
 
+### From installation script
+
+```sh
+curl -sSL https://raw.githubusercontent.com/idelchi/gocry/refs/heads/dev/install.sh | sh -s -- -d ~/.local/bin
+```
+
 ## Usage
 
 ```sh
-gocry [flags] [file]
+gocry [flags] command [flags]
 ```
 
 The available flags include:
@@ -109,37 +115,37 @@ When using `--mode line`, `gocry` processes only the lines that contain specific
 
 The directives themselves can be customized using the `--directives.encrypt` and `--directives.decrypt` flags.
 
-### Example Input File (input.txt):
+### Example Input File (input.txt)
 
-```
+```text
 This is a normal line.
 This line will be encrypted. ### DIRECTIVE: ENCRYPT
 Another normal line.
 ```
 
-### Encrypting the File:
+### Encrypting the File
 
 ```sh
 gocry -m line -k path/to/keyfile encrypt input.txt > encrypted.txt
 ```
 
-### Resulting Output (encrypted.txt):
+### Resulting Output (encrypted.txt)
 
-```
+```text
 This is a normal line.
 ### DIRECTIVE: DECRYPT: VGhpcyBsaW5lIHdpbGwgYmUgZW5jcnlwdGVkLiBPRmx2eGZpRk9GMkF3PT0=
 Another normal line.
 ```
 
-### Decrypting the File:
+### Decrypting the File
 
 ```sh
 gocry -k path/to/keyfile -m line decrypt encrypted.txt > decrypted.txt
 ```
 
-### Resulting Output (decrypted.txt):
+### Resulting Output (decrypted.txt)
 
-```
+```text
 This is a normal line.
 This line will be encrypted. ### DIRECTIVE: ENCRYPT
 Another normal line.

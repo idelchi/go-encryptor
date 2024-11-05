@@ -19,15 +19,15 @@ func (e *Encryptor) encryptBytes(data []byte) ([]byte, error) {
 
 	// Allocate space for IV and ciphertext in a single slice
 	ciphertext := make([]byte, aes.BlockSize+len(data))
-	iv := ciphertext[:aes.BlockSize]
+	initializationVector := ciphertext[:aes.BlockSize]
 
 	// Generate random IV using crypto/rand
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	if _, err := io.ReadFull(rand.Reader, initializationVector); err != nil {
 		return nil, fmt.Errorf("generating IV: %w", err)
 	}
 
 	// Encrypt data using CFB mode
-	stream := cipher.NewCFBEncrypter(block, iv)
+	stream := cipher.NewCFBEncrypter(block, initializationVector)
 	stream.XORKeyStream(ciphertext[aes.BlockSize:], data)
 
 	return ciphertext, nil
@@ -39,7 +39,7 @@ func (e *Encryptor) encryptBytes(data []byte) ([]byte, error) {
 func (e *Encryptor) decryptBytes(ciphertext []byte) ([]byte, error) {
 	// Verify minimum length requirement for IV
 	if len(ciphertext) < aes.BlockSize {
-		return nil, fmt.Errorf("ciphertext too short")
+		return nil, fmt.Errorf("ciphertext too short") //nolint: err113
 	}
 
 	block, err := aes.NewCipher(e.Key)

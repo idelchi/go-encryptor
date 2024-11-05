@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/idelchi/gocry/internal/config"
-	"github.com/idelchi/gocry/pkg/cobraext"
+	"github.com/idelchi/gogen/pkg/cobraext"
 )
 
 // NewRootCommand creates the root command with common configuration.

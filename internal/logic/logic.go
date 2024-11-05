@@ -1,4 +1,4 @@
-// Package logic implements the core business logic for the encryption/decryption service.
+// Package logic implements the core business logic for the encryption/decryption.
 package logic
 
 import (
@@ -8,8 +8,8 @@ import (
 	"github.com/idelchi/go-next-tag/pkg/stdin"
 	"github.com/idelchi/gocry/internal/config"
 	"github.com/idelchi/gocry/internal/encrypt"
-	"github.com/idelchi/gocry/internal/printer"
 	"github.com/idelchi/gogen/pkg/key"
+	"github.com/idelchi/gogen/pkg/printer"
 )
 
 // Run executes the main encryption/decryption logic based on the provided configuration.

@@ -11,35 +11,47 @@ import (
 // ErrUsage indicates an error in command-line usage or configuration.
 var ErrUsage = errors.New("usage error")
 
+// Key represents an encryption key configuration.
 type Key struct {
 	// String is a hexadecimal key string
-	String string `mask:"fixed" validate:"hexadecimal,len=64,exclusive=File" mapstructure:"key" label:"--key"`
+	String string `label:"--key" mapstructure:"key" mask:"fixed" validate:"hexadecimal,len=64,exclusive=File"`
+
 	// File is a path to a file containing a hexadecimal key string
-	File string `validate:"exclusive=String" mapstructure:"key-file" label:"--key-file"`
+	File string `label:"--key-file" mapstructure:"key-file" validate:"exclusive=String"`
 }
 
+// Config holds the application's configuration parameters.
 type Config struct {
 	// Show enables output display
 	Show bool
 
 	// Parallel is the number of parallel workers to use
-	Parallel int `validate:"min=1" mapstructure:"parallel"`
+	Parallel int `mapstructure:"parallel" validate:"min=1"`
 
 	// Mode is the encryption mode
 	Mode encrypt.Mode `validate:"oneof=file line"`
+
 	// Operation is the encryption operation
-	Operation encrypt.Operation `validate:"oneof=encrypt decrypt" mapstructure:"-"`
+	Operation encrypt.Operation `mapstructure:"-" validate:"oneof=encrypt decrypt"`
+
 	// Key is the encryption key
 	Key Key `mapstructure:",squash"`
+
 	// File is the path to the input file
-	File string `validate:"required" mapstructure:"-"`
+	File string `mapstructure:"-" validate:"required"`
+
 	// Directives contains the markers used to identify content for processing
 	Directives encrypt.Directives `mapstructure:",squash"`
 }
 
+// Display returns the value of the Show field.
+func (c Config) Display() bool {
+	return c.Show
+}
+
 // Validate performs configuration validation using the validator package.
 // It returns a wrapped ErrUsage if any validation rules are violated.
-func Validate(config any) error {
+func (c Config) Validate(config any) error {
 	validator := validator.NewValidator()
 
 	if err := registerExclusive(validator); err != nil {
