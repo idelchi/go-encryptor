@@ -71,11 +71,11 @@ func Run(cfg *config.Config) error {
 
 	// Print operation summary based on mode
 	if cfg.Mode == "file" {
-		printer.Stderrln("\n%sed file: %q", cfg.Operation, cfg.File)
+		printer.Stderrln("%sed file: %q", cfg.Operation, cfg.File)
 	}
 
 	if cfg.Mode == "line" && processed {
-		printer.Stderrln("\n%sed lines in: %q", cfg.Operation, cfg.File)
+		printer.Stderrln("%sed lines in: %q", cfg.Operation, cfg.File)
 	}
 
 	return nil
