@@ -1,9 +1,0 @@
-cyclop
-Encryptor
-encryptor
-gocognit
-gocry
-gogen
-idelchi
-nolint
-Stderrln
