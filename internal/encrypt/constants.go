@@ -15,7 +15,6 @@ const (
 )
 
 // Type represents whether encryption is deterministic or not.
-// Note: This type is prepared for future extensions of the encryption package.
 type Type string
 
 // Mode represents the mode of operation for processing input data.

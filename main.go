@@ -1,7 +1,14 @@
-// Command gocry is a command-line utility for encrypting and decrypting files using a specified key.
-// It supports file encryption and line-by-line encryption based on directives within the file.
-// The program outputs the processed content to standard output (stdout).
-// All other informative messages are outputted to standard error (stderr).
+// Command gocry provides file encryption and decryption with support for both
+// whole-file and line-by-line processing modes. It can be used as a standalone
+// tool or integrated with git as a filter for automatic encryption/decryption.
+//
+// Basic usage:
+//
+//	gocry [flags] command [flags]
+//
+// The tool supports reading from stdin and writing to stdout, making it suitable
+// for use in git filter pipelines. In line mode, encryption/decryption is guided
+// by directives within the file content.
 package main
 
 import (

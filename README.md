@@ -36,14 +36,15 @@ gocry [flags] command [flags]
 
 | Flag             | Environment Variable      | Description                         | Default                  |
 | ---------------- | ------------------------- | ----------------------------------- | ------------------------ |
-| `-s, --show`     | `GOCRY_SHOW`              | Show the configuration and exit     | `false`                  |
-| `-m, --mode`     | `GOCRY_MODE`              | Mode of operation: "file" or "line" | `file`                   |
+| `-j, --parallel` | `GOCRY_PARALLEL`          | Number of parallel workers          | `runtime.NumCPU()`       |
 | `-k, --key`      | `GOCRY_KEY`               | Key for encryption/decryption       | -                        |
 | `-f, --key-file` | `GOCRY_KEY_FILE`          | Path to the key file                | -                        |
+| `-m, --mode`     | `GOCRY_MODE`              | Mode of operation: `file` or `line` | `file`                   |
 | `--encrypt`      | `GOCRY_ENCRYPT_DIRECTIVE` | Directive for encryption            | `### DIRECTIVE: ENCRYPT` |
 | `--decrypt`      | `GOCRY_DECRYPT_DIRECTIVE` | Directive for decryption            | `### DIRECTIVE: DECRYPT` |
-| `-h, --help`     | -                         | Help for gocry                      | -                        |
-| `-v, --version`  | -                         | Version for gocry                   | -                        |
+| `-s, --show`     | `GOCRY_SHOW`              | Show the configuration and exit     | `false`                  |
+| `-h, --help`     | -                         | Help for `gocry`                    | -                        |
+| `-v, --version`  | -                         | Version for `gocry`                 | -                        |
 
 ### Commands
 

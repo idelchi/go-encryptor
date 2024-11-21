@@ -7,6 +7,8 @@ import (
 	"github.com/idelchi/gogen/pkg/cobraext"
 )
 
+// setFileAndValidate reduces boilerplate code for commands that require
+// a file argument (as positional or piped) and a key argument.
 func setFileAndValidate(cfg *config.Config, args []string) error {
 	arg, err := cobraext.PipeOrArg(args)
 	if err != nil {
