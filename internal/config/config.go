@@ -40,6 +40,9 @@ type Config struct {
 	// File is the path to the input file
 	File string `mapstructure:"-" validate:"required"`
 
+	// Experiments enables experimental features
+	Experiments bool `mapstructure:"experiments"`
+
 	// Directives contains the markers used to identify content for processing
 	Directives encrypt.Directives `mapstructure:",squash"`
 }

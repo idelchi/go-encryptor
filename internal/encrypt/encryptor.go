@@ -41,7 +41,10 @@ type Encryptor struct {
 func (e *Encryptor) Process(reader io.Reader, writer io.Writer) (bool, error) {
 	switch e.Mode {
 	case Line:
-		return e.processLines(reader, writer, e.Parallel)
+		if e.Parallel > 1 {
+			return e.processLines(reader, writer, e.Parallel)
+		}
+		return e.processLinesExperiments(reader, writer)
 	case File:
 		return e.processWholeFile(reader, writer)
 	default:

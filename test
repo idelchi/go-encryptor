@@ -1,0 +1,9 @@
+This is secret ### DIRECTIVE: ENCRYPT
+### DIRECTIVE: ENCRYPT
+This will also be secret
+This wont be a secret
+This will be a secret too ### DIRECTIVE: ENCRYPT
+
+Here nothing will happen
+
+### DIRECTIVE: ENCRYPT

@@ -79,15 +79,11 @@ USER root
 
 # timezone
 RUN apk add --no-cache \
-    git \
-    tzdata \
-    coreutils \
-    jq \
-    openssl
+    tzdata
 
 # Copy artifacts from the build stage
 COPY --from=build /etc/passwd /etc/passwd
-COPY --from=build /go/bin/go-encryptor /usr/local/bin/go-encryptor
+COPY --from=build /go/bin/gocry /usr/local/bin/gocry
 
 USER ${USER}
 WORKDIR /home/${USER}

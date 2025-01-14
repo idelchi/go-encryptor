@@ -138,3 +138,7 @@ For detailed help on any command:
 gocry --help
 gocry <command> --help
 ```
+
+## TODO
+
+Allow for ENCRYPT/DECRYPT on the next line

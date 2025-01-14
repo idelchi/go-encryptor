@@ -47,6 +47,12 @@ func Run(cfg *config.Config) error {
 		return fmt.Errorf("%w: invalid key length: got %d bytes, want %d", config.ErrUsage, len(encryptionKey), keySize)
 	}
 
+	if cfg.Experiments {
+		cfg.Parallel = 1
+
+		printer.Stderrln("Experimental features enabled: parallel processing disabled")
+	}
+
 	// Load input data from stdin or file
 	data, err := loadData(cfg.File)
 	if err != nil {
